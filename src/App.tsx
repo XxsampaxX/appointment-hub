@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import ServicesPage from "./pages/ServicesPage";
 import ClientsPage from "./pages/ClientsPage";
 import AgendaPage from "./pages/AgendaPage";
+import ProfessionalsPage from "./pages/ProfessionalsPage";
+import BookingPage from "./pages/BookingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,8 +26,13 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Rota pública de agendamento */}
+      <Route path="/agendar" element={<BookingPage />} />
+      
+      {/* Rotas de admin */}
       <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/profissionais" element={<ProtectedRoute><ProfessionalsPage /></ProtectedRoute>} />
       <Route path="/servicos" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
       <Route path="/clientes" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
       <Route path="/agenda" element={<ProtectedRoute><AgendaPage /></ProtectedRoute>} />
