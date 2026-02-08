@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { LayoutDashboard, Users, Scissors, CalendarDays, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Scissors, CalendarDays, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/profissionais", label: "Profissionais", icon: UserCircle },
   { to: "/servicos", label: "Serviços", icon: Scissors },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/agenda", label: "Agenda", icon: CalendarDays },

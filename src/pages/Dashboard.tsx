@@ -1,37 +1,50 @@
 import { useStore } from "@/hooks/useStore";
-import type { Service, Client, Appointment } from "@/types";
+import type { Service, Client, Appointment, Professional } from "@/types";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Scissors, Users, CalendarDays, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Scissors, Users, CalendarDays, Clock, CheckCircle, XCircle, UserCircle, ExternalLink } from "lucide-react";
 
 export default function Dashboard() {
   const { items: services } = useStore<Service>("crm_services");
   const { items: clients } = useStore<Client>("crm_clients");
   const { items: appointments } = useStore<Appointment>("crm_appointments");
+  const { items: professionals } = useStore<Professional>("crm_professionals");
 
   const today = new Date().toISOString().split("T")[0];
-  const todayAppointments = appointments.filter((a) => a.date === today);
+  const todayAppointments = appointments.filter((a) => a.date === today && a.status === "agendado");
   const scheduled = appointments.filter((a) => a.status === "agendado").length;
   const completed = appointments.filter((a) => a.status === "concluido").length;
   const cancelled = appointments.filter((a) => a.status === "cancelado").length;
 
   const stats = [
-    { label: "Serviços", value: services.length, icon: Scissors, to: "/servicos", color: "text-primary" },
-    { label: "Clientes", value: clients.length, icon: Users, to: "/clientes", color: "text-accent" },
-    { label: "Agendamentos", value: appointments.length, icon: CalendarDays, to: "/agenda", color: "text-warning" },
+    { label: "Profissionais", value: professionals.length, icon: UserCircle, to: "/profissionais", color: "text-primary" },
+    { label: "Serviços", value: services.length, icon: Scissors, to: "/servicos", color: "text-accent" },
+    { label: "Clientes", value: clients.length, icon: Users, to: "/clientes", color: "text-warning" },
   ];
 
-  const getClientName = (id: string) => clients.find((c) => c.id === id)?.name ?? "—";
+  const getClientName = (a: Appointment) => {
+    if (a.clientName) return a.clientName;
+    return clients.find((c) => c.id === a.clientId)?.name ?? "—";
+  };
   const getServiceName = (id: string) => services.find((s) => s.id === id)?.name ?? "—";
+  const getProfessionalName = (id: string) => professionals.find((p) => p.id === id)?.name ?? "—";
 
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="font-heading text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground text-sm mt-1">Visão geral do sistema</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-heading text-2xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground text-sm mt-1">Visão geral do sistema</p>
+          </div>
+          <Link to="/agendar" target="_blank">
+            <Button variant="outline" className="gap-2">
+              <ExternalLink className="h-4 w-4" />
+              Link de Agendamento
+            </Button>
+          </Link>
         </div>
 
         {/* Stats cards */}
@@ -86,8 +99,11 @@ export default function Dashboard() {
 
         {/* Today's appointments */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-heading">Agendamentos de Hoje</CardTitle>
+            <Link to="/agenda">
+              <Button variant="ghost" size="sm">Ver todos</Button>
+            </Link>
           </CardHeader>
           <CardContent>
             {todayAppointments.length === 0 ? (
@@ -102,22 +118,16 @@ export default function Dashboard() {
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                   >
                     <div>
-                      <p className="font-medium text-sm">{getClientName(apt.clientId)}</p>
-                      <p className="text-xs text-muted-foreground">{getServiceName(apt.serviceId)}</p>
+                      <p className="font-medium text-sm">{getClientName(apt)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {getServiceName(apt.serviceId)} • {getProfessionalName(apt.professionalId)}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-sm">{apt.time}</p>
-                      <span
-                        className={`text-xs font-medium ${
-                          apt.status === "agendado"
-                            ? "text-warning"
-                            : apt.status === "concluido"
-                            ? "text-success"
-                            : "text-destructive"
-                        }`}
-                      >
-                        {apt.status}
-                      </span>
+                      {apt.clientPhone && (
+                        <p className="text-xs text-muted-foreground">📱 {apt.clientPhone}</p>
+                      )}
                     </div>
                   </div>
                 ))}
