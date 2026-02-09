@@ -103,8 +103,8 @@ export default function UserBookingPage() {
       <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center animate-fade-in">
           <CardContent className="py-12 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-              <Check className="h-8 w-8 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <Check className="h-8 w-8 text-primary" />
             </div>
             <h1 className="font-heading text-2xl font-bold">Agendamento Confirmado!</h1>
             <div className="text-muted-foreground space-y-1">
