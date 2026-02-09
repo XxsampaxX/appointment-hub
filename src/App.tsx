@@ -5,37 +5,61 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "@/contexts/AuthContext";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ServicesPage from "./pages/ServicesPage";
 import ClientsPage from "./pages/ClientsPage";
 import AgendaPage from "./pages/AgendaPage";
 import ProfessionalsPage from "./pages/ProfessionalsPage";
 import BookingPage from "./pages/BookingPage";
+import UserBookingPage from "./pages/UserBookingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+// Rota protegida para admin
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, currentUser } = useAuthContext();
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (currentUser?.role !== "admin") return <Navigate to="/meus-agendamentos" replace />;
+  return <>{children}</>;
+}
+
+// Rota protegida para usuário comum
+function UserRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthContext();
   if (!isAuthenticated) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, currentUser } = useAuthContext();
+
+  const homeRedirect = isAuthenticated
+    ? currentUser?.role === "admin"
+      ? "/dashboard"
+      : "/meus-agendamentos"
+    : undefined;
 
   return (
     <Routes>
-      {/* Rota pública de agendamento */}
+      {/* Rota pública de agendamento (sem login) */}
       <Route path="/agendar" element={<BookingPage />} />
-      
-      {/* Rotas de admin */}
-      <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/profissionais" element={<ProtectedRoute><ProfessionalsPage /></ProtectedRoute>} />
-      <Route path="/servicos" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
-      <Route path="/clientes" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
-      <Route path="/agenda" element={<ProtectedRoute><AgendaPage /></ProtectedRoute>} />
+
+      {/* Auth */}
+      <Route path="/" element={homeRedirect ? <Navigate to={homeRedirect} replace /> : <Login />} />
+      <Route path="/cadastro" element={isAuthenticated ? <Navigate to={homeRedirect!} replace /> : <Register />} />
+
+      {/* Admin */}
+      <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+      <Route path="/profissionais" element={<AdminRoute><ProfessionalsPage /></AdminRoute>} />
+      <Route path="/servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
+      <Route path="/clientes" element={<AdminRoute><ClientsPage /></AdminRoute>} />
+      <Route path="/agenda" element={<AdminRoute><AgendaPage /></AdminRoute>} />
+
+      {/* Usuário comum */}
+      <Route path="/meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
