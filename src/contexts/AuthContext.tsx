@@ -4,7 +4,8 @@ import type { User } from "@/types";
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (phone: string, cpf: string) => boolean;
+  register: (name: string, phone: string, cpf: string) => { success: boolean; message: string };
   logout: () => void;
   isAuthenticated: boolean;
 }
