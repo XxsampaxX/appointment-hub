@@ -100,11 +100,11 @@ export function useAuth() {
       return { success: false, message: "Preencha todos os campos corretamente." };
     }
 
-    if (users.some((u) => u.phone.replace(/\D/g, "") === cleanPhone)) {
+    if (users.some((u) => u.phone && u.phone.replace(/\D/g, "") === cleanPhone)) {
       return { success: false, message: "Este telefone já está cadastrado." };
     }
 
-    if (users.some((u) => u.cpf.replace(/\D/g, "") === cleanCpf)) {
+    if (users.some((u) => u.cpf && u.cpf.replace(/\D/g, "") === cleanCpf)) {
       return { success: false, message: "Este CPF já está cadastrado." };
     }
 
