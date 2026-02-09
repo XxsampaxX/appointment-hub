@@ -81,7 +81,7 @@ export function useAuth() {
     const cleanPhone = phone.replace(/\D/g, "");
     const cleanCpf = cpf.replace(/\D/g, "");
     const user = users.find(
-      (u) => u.phone.replace(/\D/g, "") === cleanPhone && u.cpf.replace(/\D/g, "") === cleanCpf
+      (u) => u.phone && u.cpf && u.phone.replace(/\D/g, "") === cleanPhone && u.cpf.replace(/\D/g, "") === cleanCpf
     );
     if (user) {
       setCurrentUser(user);
