@@ -14,26 +14,31 @@ import ProfessionalsPage from "./pages/ProfessionalsPage";
 import BookingPage from "./pages/BookingPage";
 import UserBookingPage from "./pages/UserBookingPage";
 import NotFound from "./pages/NotFound";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-// Rota protegida para admin
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, currentUser } = useAuthContext();
+  const { isAuthenticated, currentUser, loading } = useAuthContext();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!isAuthenticated) return <Navigate to="/" replace />;
   if (currentUser?.role !== "admin") return <Navigate to="/meus-agendamentos" replace />;
   return <>{children}</>;
 }
 
-// Rota protegida para usuário comum
 function UserRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, loading } = useAuthContext();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!isAuthenticated) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { isAuthenticated, currentUser } = useAuthContext();
+  const { isAuthenticated, currentUser, loading } = useAuthContext();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
 
   const homeRedirect = isAuthenticated
     ? currentUser?.role === "admin"
@@ -43,21 +48,16 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rota pública de agendamento (sem login) */}
       <Route path="/agendar" element={<BookingPage />} />
-
-      {/* Auth */}
       <Route path="/" element={homeRedirect ? <Navigate to={homeRedirect} replace /> : <Login />} />
       <Route path="/cadastro" element={isAuthenticated ? <Navigate to={homeRedirect!} replace /> : <Register />} />
 
-      {/* Admin */}
       <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
       <Route path="/profissionais" element={<AdminRoute><ProfessionalsPage /></AdminRoute>} />
       <Route path="/servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
       <Route path="/clientes" element={<AdminRoute><ClientsPage /></AdminRoute>} />
       <Route path="/agenda" element={<AdminRoute><AgendaPage /></AdminRoute>} />
 
-      {/* Usuário comum */}
       <Route path="/meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
 
       <Route path="*" element={<NotFound />} />

@@ -1,20 +1,20 @@
 import { useState, useMemo } from "react";
-import { useStore, generateId } from "@/hooks/useStore";
+import { useServices, useProfessionals, useAppointments } from "@/hooks/useSupabaseData";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { Appointment, Service, Professional } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut } from "lucide-react";
+import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Step = "professional" | "service" | "datetime" | "confirm";
 
 export default function UserBookingPage() {
   const { currentUser, logout } = useAuthContext();
-  const { items: services } = useStore<Service>("crm_services");
-  const { items: professionals } = useStore<Professional>("crm_professionals");
-  const { items: appointments, add } = useStore<Appointment>("crm_appointments");
+  const { items: services } = useServices();
+  const { items: professionals } = useProfessionals();
+  const { items: appointments, add } = useAppointments();
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("professional");
@@ -23,13 +23,13 @@ export default function UserBookingPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const availableProfessionals = professionals.filter((p) => p.available);
 
-  // Meus agendamentos
   const myAppointments = useMemo(
-    () => appointments.filter((a) => a.clientId === currentUser?.id && a.status === "agendado"),
-    [appointments, currentUser]
+    () => appointments.filter((a) => a.status === "agendado"),
+    [appointments]
   );
 
   const timeSlots = useMemo(() => {
@@ -66,12 +66,12 @@ export default function UserBookingPage() {
     return dates;
   }, []);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime || !currentUser) return;
+    setSubmitting(true);
 
-    add({
-      id: generateId(),
-      clientId: currentUser.id,
+    const { error } = await add({
+      clientId: "",
       clientName: currentUser.name,
       clientPhone: currentUser.phone,
       serviceId: selectedService.id,
@@ -81,6 +81,16 @@ export default function UserBookingPage() {
       status: "agendado",
       notes: "",
     });
+
+    setSubmitting(false);
+    if (error) {
+      if (error.message?.includes("unique") || error.code === "23505") {
+        toast({ title: "Horário indisponível", description: "Este horário já está ocupado.", variant: "destructive" });
+      } else {
+        toast({ title: "Erro ao agendar", description: error.message, variant: "destructive" });
+      }
+      return;
+    }
 
     setConfirmed(true);
     toast({ title: "Agendamento confirmado!" });
@@ -122,7 +132,6 @@ export default function UserBookingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
-      {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-2">
@@ -146,7 +155,6 @@ export default function UserBookingPage() {
         </div>
       </header>
 
-      {/* Progress */}
       <div className="container px-4 py-4">
         <div className="flex gap-1">
           {["professional", "service", "datetime", "confirm"].map((s, i) => (
@@ -158,7 +166,6 @@ export default function UserBookingPage() {
       </div>
 
       <main className="container px-4 pb-8 animate-fade-in">
-        {/* Meus agendamentos */}
         {step === "professional" && myAppointments.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
@@ -181,7 +188,6 @@ export default function UserBookingPage() {
           </Card>
         )}
 
-        {/* Step 1: Professional */}
         {step === "professional" && (
           <div className="space-y-4">
             <div className="text-center mb-6">
@@ -211,7 +217,6 @@ export default function UserBookingPage() {
           </div>
         )}
 
-        {/* Step 2: Service (view only) */}
         {step === "service" && (
           <div className="space-y-4">
             <div className="text-center mb-6">
@@ -241,7 +246,6 @@ export default function UserBookingPage() {
           </div>
         )}
 
-        {/* Step 3: DateTime */}
         {step === "datetime" && (
           <div className="space-y-6">
             <div className="text-center mb-2">
@@ -286,7 +290,6 @@ export default function UserBookingPage() {
           </div>
         )}
 
-        {/* Step 4: Confirm */}
         {step === "confirm" && (
           <div className="space-y-6">
             <div className="text-center mb-2">
@@ -319,7 +322,10 @@ export default function UserBookingPage() {
                 </div>
               </CardContent>
             </Card>
-            <Button className="w-full" size="lg" onClick={handleConfirm}>Confirmar Agendamento</Button>
+            <Button className="w-full" size="lg" onClick={handleConfirm} disabled={submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirmar Agendamento
+            </Button>
           </div>
         )}
       </main>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useStore, generateId } from "@/hooks/useStore";
+import { useProfessionals } from "@/hooks/useSupabaseData";
 import type { Professional } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, User } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const emptyForm = { name: "", role: "", avatar: "", available: true };
 
 export default function ProfessionalsPage() {
-  const { items: professionals, add, update, remove } = useStore<Professional>("crm_professionals");
+  const { items: professionals, add, update, remove, loading } = useProfessionals();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Professional | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -27,30 +27,34 @@ export default function ProfessionalsPage() {
     setOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.role.trim()) {
       toast({ title: "Preencha nome e função", variant: "destructive" });
       return;
     }
     if (editing) {
-      update(editing.id, form);
+      await update(editing.id, form);
       toast({ title: "Profissional atualizado" });
     } else {
-      add({ id: generateId(), ...form });
+      await add(form as any);
       toast({ title: "Profissional criado" });
     }
     setOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    remove(id);
+  const handleDelete = async (id: string) => {
+    await remove(id);
     toast({ title: "Profissional removido" });
   };
 
-  const toggleAvailable = (p: Professional) => {
-    update(p.id, { available: !p.available });
+  const toggleAvailable = async (p: Professional) => {
+    await update(p.id, { available: !p.available });
   };
+
+  if (loading) {
+    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+  }
 
   return (
     <Layout>

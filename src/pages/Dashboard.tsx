@@ -1,16 +1,18 @@
-import { useStore } from "@/hooks/useStore";
-import type { Service, Client, Appointment, Professional } from "@/types";
+import { useServices, useProfessionals, useClients, useAppointments } from "@/hooks/useSupabaseData";
+import type { Appointment } from "@/types";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Scissors, Users, CalendarDays, Clock, CheckCircle, XCircle, UserCircle, ExternalLink } from "lucide-react";
+import { Scissors, Users, CalendarDays, Clock, CheckCircle, XCircle, UserCircle, ExternalLink, Loader2 } from "lucide-react";
 
 export default function Dashboard() {
-  const { items: services } = useStore<Service>("crm_services");
-  const { items: clients } = useStore<Client>("crm_clients");
-  const { items: appointments } = useStore<Appointment>("crm_appointments");
-  const { items: professionals } = useStore<Professional>("crm_professionals");
+  const { items: services, loading: ls } = useServices();
+  const { items: clients, loading: lc } = useClients();
+  const { items: appointments, loading: la } = useAppointments();
+  const { items: professionals, loading: lp } = useProfessionals();
+
+  const loading = ls || lc || la || lp;
 
   const today = new Date().toISOString().split("T")[0];
   const todayAppointments = appointments.filter((a) => a.date === today && a.status === "agendado");
@@ -31,6 +33,10 @@ export default function Dashboard() {
   const getServiceName = (id: string) => services.find((s) => s.id === id)?.name ?? "—";
   const getProfessionalName = (id: string) => professionals.find((p) => p.id === id)?.name ?? "—";
 
+  if (loading) {
+    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -47,7 +53,6 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Stats cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {stats.map((stat) => (
             <Link key={stat.to} to={stat.to}>
@@ -66,7 +71,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Status breakdown */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardContent className="flex items-center gap-3 p-4">
@@ -97,7 +101,6 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Today's appointments */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-heading">Agendamentos de Hoje</CardTitle>
@@ -113,10 +116,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {todayAppointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
+                  <div key={apt.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <div>
                       <p className="font-medium text-sm">{getClientName(apt)}</p>
                       <p className="text-xs text-muted-foreground">

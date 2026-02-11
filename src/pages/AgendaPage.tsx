@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useStore, generateId } from "@/hooks/useStore";
-import type { Appointment, Client, Service, Professional } from "@/types";
+import { useAppointments, useClients, useServices, useProfessionals } from "@/hooks/useSupabaseData";
+import type { Appointment } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,16 +9,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, User } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as Appointment["status"], notes: "" };
 
 export default function AgendaPage() {
-  const { items: appointments, add, update, remove } = useStore<Appointment>("crm_appointments");
-  const { items: clients } = useStore<Client>("crm_clients");
-  const { items: services } = useStore<Service>("crm_services");
-  const { items: professionals } = useStore<Professional>("crm_professionals");
+  const { items: appointments, add, update, remove, loading: la } = useAppointments();
+  const { items: clients } = useClients();
+  const { items: services } = useServices();
+  const { items: professionals } = useProfessionals();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Appointment | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -27,36 +27,36 @@ export default function AgendaPage() {
   const openNew = () => { setEditing(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (a: Appointment) => {
     setEditing(a);
-    setForm({ 
-      clientId: a.clientId, 
-      serviceId: a.serviceId, 
+    setForm({
+      clientId: a.clientId,
+      serviceId: a.serviceId,
       professionalId: a.professionalId,
-      date: a.date, 
-      time: a.time, 
-      status: a.status, 
-      notes: a.notes 
+      date: a.date,
+      time: a.time,
+      status: a.status,
+      notes: a.notes,
     });
     setOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.serviceId || !form.professionalId || !form.date || !form.time) {
       toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
       return;
     }
     if (editing) {
-      update(editing.id, form);
+      await update(editing.id, form);
       toast({ title: "Agendamento atualizado" });
     } else {
-      add({ id: generateId(), ...form });
+      await add(form as any);
       toast({ title: "Agendamento criado" });
     }
     setOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    remove(id);
+  const handleDelete = async (id: string) => {
+    await remove(id);
     toast({ title: "Agendamento removido" });
   };
 
@@ -67,24 +67,18 @@ export default function AgendaPage() {
   const getServiceName = (id: string) => services.find((s) => s.id === id)?.name ?? "—";
   const getProfessionalName = (id: string) => professionals.find((p) => p.id === id)?.name ?? "—";
 
-  const statusLabel: Record<string, string> = {
-    agendado: "Agendado",
-    concluido: "Concluído",
-    cancelado: "Cancelado",
-  };
+  const statusLabel: Record<string, string> = { agendado: "Agendado", concluido: "Concluído", cancelado: "Cancelado" };
+  const statusColor: Record<string, string> = { agendado: "text-warning", concluido: "text-success", cancelado: "text-destructive" };
 
-  const statusColor: Record<string, string> = {
-    agendado: "text-warning",
-    concluido: "text-success",
-    cancelado: "text-destructive",
-  };
-
-  // Ordenar por data/hora
   const sorted = [...appointments].sort((a, b) => {
     const da = `${a.date}T${a.time}`;
     const db = `${b.date}T${b.time}`;
     return da.localeCompare(db);
   });
+
+  if (la) {
+    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+  }
 
   return (
     <Layout>
@@ -113,7 +107,6 @@ export default function AgendaPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {professionals.length === 0 && <p className="text-xs text-destructive">Cadastre profissionais primeiro.</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>Cliente (opcional)</Label>
@@ -136,7 +129,6 @@ export default function AgendaPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {services.length === 0 && <p className="text-xs text-destructive">Cadastre serviços primeiro.</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
