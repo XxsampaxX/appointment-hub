@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CalendarDays, User, Phone, KeyRound } from "lucide-react";
+import { CalendarDays, User, Phone, KeyRound, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -27,16 +27,18 @@ export default function Register() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { register } = useAuthContext();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = register(name, phone, cpf);
+    setSubmitting(true);
+    const result = await register(name, phone, cpf);
+    setSubmitting(false);
     if (result.success) {
       toast({ title: result.message });
-      // Login automático já feito pelo register, redireciona
       navigate("/");
     } else {
       toast({ title: "Erro no cadastro", description: result.message, variant: "destructive" });
@@ -68,6 +70,7 @@ export default function Register() {
                   onChange={(e) => setName(e.target.value)}
                   className="pl-10"
                   required
+                  disabled={submitting}
                 />
               </div>
             </div>
@@ -83,6 +86,7 @@ export default function Register() {
                   onChange={(e) => setPhone(maskPhone(e.target.value))}
                   className="pl-10"
                   required
+                  disabled={submitting}
                 />
               </div>
             </div>
@@ -98,10 +102,12 @@ export default function Register() {
                   onChange={(e) => setCpf(maskCpf(e.target.value))}
                   className="pl-10"
                   required
+                  disabled={submitting}
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Cadastrar
             </Button>
           </form>

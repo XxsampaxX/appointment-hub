@@ -1,54 +1,53 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useStore, generateId } from "@/hooks/useStore";
+import { useServices } from "@/hooks/useSupabaseData";
 import type { Service } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const emptyService = { name: "", duration: 30, price: 0, description: "" };
 
 export default function ServicesPage() {
-  const { items: services, add, update, remove } = useStore<Service>("crm_services");
+  const { items: services, add, update, remove, loading } = useServices();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
   const [form, setForm] = useState(emptyService);
   const { toast } = useToast();
 
-  const openNew = () => {
-    setEditing(null);
-    setForm(emptyService);
-    setOpen(true);
-  };
-
+  const openNew = () => { setEditing(null); setForm(emptyService); setOpen(true); };
   const openEdit = (s: Service) => {
     setEditing(s);
     setForm({ name: s.name, duration: s.duration, price: s.price, description: s.description });
     setOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
     if (editing) {
-      update(editing.id, form);
+      await update(editing.id, form);
       toast({ title: "Serviço atualizado" });
     } else {
-      add({ id: generateId(), ...form });
+      await add(form as any);
       toast({ title: "Serviço criado" });
     }
     setOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    remove(id);
+  const handleDelete = async (id: string) => {
+    await remove(id);
     toast({ title: "Serviço removido" });
   };
+
+  if (loading) {
+    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+  }
 
   return (
     <Layout>

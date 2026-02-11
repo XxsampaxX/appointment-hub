@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CalendarDays, Phone, KeyRound } from "lucide-react";
+import { CalendarDays, Phone, KeyRound, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
-// Máscara de telefone: (99) 99999-9999
 function maskPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 2) return `(${digits}`;
@@ -16,7 +15,6 @@ function maskPhone(value: string) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
-// Máscara de CPF: 999.999.999-99
 function maskCpf(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 3) return digits;
@@ -28,16 +26,19 @@ function maskCpf(value: string) {
 export default function Login() {
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { login } = useAuthContext();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(phone, cpf);
-    if (!success) {
+    setSubmitting(true);
+    const result = await login(phone, cpf);
+    setSubmitting(false);
+    if (!result.success) {
       toast({
         title: "Erro de autenticação",
-        description: "Telefone ou CPF incorretos.",
+        description: result.message,
         variant: "destructive",
       });
     }
@@ -69,6 +70,7 @@ export default function Login() {
                   onChange={(e) => setPhone(maskPhone(e.target.value))}
                   className="pl-10"
                   required
+                  disabled={submitting}
                 />
               </div>
             </div>
@@ -84,10 +86,12 @@ export default function Login() {
                   onChange={(e) => setCpf(maskCpf(e.target.value))}
                   className="pl-10"
                   required
+                  disabled={submitting}
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Entrar
             </Button>
           </form>
@@ -98,9 +102,6 @@ export default function Login() {
               </Button>
             </Link>
           </div>
-          <p className="text-xs text-muted-foreground text-center mt-4">
-            Admin padrão: (11) 99999-9999 / 000.000.000-00
-          </p>
         </CardContent>
       </Card>
     </div>

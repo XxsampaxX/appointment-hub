@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useStore, generateId } from "@/hooks/useStore";
+import { useClients } from "@/hooks/useSupabaseData";
 import type { Client } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Phone, Mail } from "lucide-react";
+import { Plus, Pencil, Trash2, Phone, Mail, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const emptyClient = { name: "", email: "", phone: "", notes: "" };
 
 export default function ClientsPage() {
-  const { items: clients, add, update, remove } = useStore<Client>("crm_clients");
+  const { items: clients, add, update, remove, loading } = useClients();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [form, setForm] = useState(emptyClient);
@@ -27,23 +27,27 @@ export default function ClientsPage() {
     setOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
     if (editing) {
-      update(editing.id, form);
+      await update(editing.id, form);
       toast({ title: "Cliente atualizado" });
     } else {
-      add({ id: generateId(), ...form });
+      await add(form as any);
       toast({ title: "Cliente criado" });
     }
     setOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    remove(id);
+  const handleDelete = async (id: string) => {
+    await remove(id);
     toast({ title: "Cliente removido" });
   };
+
+  if (loading) {
+    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+  }
 
   return (
     <Layout>
