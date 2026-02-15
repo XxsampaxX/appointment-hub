@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // Converte telefone em "email" fake para Supabase Auth
 function phoneToEmail(phone: string): string {
   const clean = phone.replace(/\D/g, "");
-  return `${clean}@agendacrm.app`;
+  return `user${clean}@agendacrm.app`;
 }
 
 // Busca perfil + role do usuário
