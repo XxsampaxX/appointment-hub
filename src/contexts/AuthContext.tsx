@@ -5,6 +5,7 @@ import type { User as AuthUser } from "@supabase/supabase-js";
 interface AppUser {
   id: string;
   name: string;
+  email: string;
   phone: string;
   cpf: string;
   role: "admin" | "user";
@@ -12,8 +13,8 @@ interface AppUser {
 
 interface AuthContextType {
   currentUser: AppUser | null;
-  login: (phone: string, cpf: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, phone: string, cpf: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, cpf: string) => Promise<{ success: boolean; message: string }>;
+  register: (name: string, email: string, phone: string, cpf: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -21,12 +22,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Converte telefone em "email" fake para Supabase Auth
-function phoneToEmail(phone: string): string {
-  const clean = phone.replace(/\D/g, "");
-  return `user${clean}@agendacrm.app`;
-}
-
+// Busca perfil + role do usuário
 // Busca perfil + role do usuário
 async function fetchUserProfile(userId: string): Promise<AppUser | null> {
   const [profileRes, roleRes] = await Promise.all([
@@ -39,6 +35,7 @@ async function fetchUserProfile(userId: string): Promise<AppUser | null> {
   return {
     id: userId,
     name: profileRes.data.name,
+    email: profileRes.data.email || "",
     phone: profileRes.data.phone,
     cpf: profileRes.data.cpf,
     role: (roleRes.data?.role as "admin" | "user") || "user",
@@ -79,30 +76,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = useCallback(async (phone: string, cpf: string) => {
-    const email = phoneToEmail(phone);
+  const login = useCallback(async (email: string, cpf: string) => {
     const password = cpf.replace(/\D/g, "");
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      return { success: false, message: "Telefone ou CPF incorretos." };
+      return { success: false, message: "Email ou CPF incorretos." };
     }
     return { success: true, message: "Login realizado!" };
   }, []);
 
-  const register = useCallback(async (name: string, phone: string, cpf: string) => {
+  const register = useCallback(async (name: string, email: string, phone: string, cpf: string) => {
     const cleanPhone = phone.replace(/\D/g, "");
     const cleanCpf = cpf.replace(/\D/g, "");
 
-    if (!name.trim() || cleanPhone.length < 10 || cleanCpf.length !== 11) {
+    if (!name.trim() || !email.trim() || cleanPhone.length < 10 || cleanCpf.length !== 11) {
       return { success: false, message: "Preencha todos os campos corretamente." };
     }
 
-    const email = phoneToEmail(phone);
-
     const { error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password: cleanCpf,
       options: {
         data: { name: name.trim(), phone: cleanPhone, cpf: cleanCpf },
@@ -112,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) {
       if (error.message.includes("already registered")) {
-        return { success: false, message: "Este telefone já está cadastrado." };
+        return { success: false, message: "Este email já está cadastrado." };
       }
       return { success: false, message: error.message };
     }

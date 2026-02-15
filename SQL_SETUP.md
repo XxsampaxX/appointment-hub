@@ -17,6 +17,7 @@ CREATE TYPE public.app_role AS ENUM ('admin', 'user');
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  email TEXT NOT NULL DEFAULT '',
   phone TEXT NOT NULL UNIQUE,
   cpf TEXT NOT NULL UNIQUE,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -128,10 +129,11 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, name, phone, cpf)
+  INSERT INTO public.profiles (id, name, email, phone, cpf)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', ''),
+    COALESCE(NEW.email, ''),
     COALESCE(NEW.raw_user_meta_data->>'phone', ''),
     COALESCE(NEW.raw_user_meta_data->>'cpf', '')
   );
@@ -286,5 +288,39 @@ CREATE POLICY "Admins can manage all appointments"
 1. Cole todo o SQL acima no SQL Editor do Supabase e clique em **Run**
 2. No painel do Supabase, vá em **Authentication → Settings → Email** e:
    - Desabilite "Enable email confirmations" (para facilitar testes)
-3. Cadastre o admin no app: telefone `(11) 99999-9999`, CPF `000.000.000-00`
+3. Cadastre o admin no app com email, telefone e CPF
 4. Depois execute o SQL de promoção a admin (seção 16 acima)
+
+---
+
+## Se já criou as tabelas antes
+
+Execute este SQL para adicionar a coluna `email` à tabela existente:
+
+```sql
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+
+-- Atualizar o trigger para salvar o email
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, name, email, phone, cpf)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'name', ''),
+    COALESCE(NEW.email, ''),
+    COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+    COALESCE(NEW.raw_user_meta_data->>'cpf', '')
+  );
+
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'user');
+
+  RETURN NEW;
+END;
+$$;
+```
