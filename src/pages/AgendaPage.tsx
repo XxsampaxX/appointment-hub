@@ -1,7 +1,8 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useAppointments, useClients, useServices, useProfessionals } from "@/hooks/useSupabaseData";
-import type { Appointment } from "@/types";
+import { useAppointments, useClients, useServices, useProfessionals } from "@/services/supabaseData";
+import { useCompanyContext } from "@/contexts/CompanyContext";
+import type { Appointment, AppointmentStatus } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,13 +13,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Pencil, Trash2, User, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as Appointment["status"], notes: "" };
+const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as AppointmentStatus, notes: "" };
+
+const statusOptions: { value: AppointmentStatus; label: string }[] = [
+  { value: "agendado", label: "Agendado" },
+  { value: "confirmado", label: "Confirmado" },
+  { value: "concluido", label: "Concluído" },
+  { value: "cancelado", label: "Cancelado" },
+  { value: "nao_compareceu", label: "Não Compareceu" },
+];
+
+const statusLabel: Record<string, string> = {
+  agendado: "Agendado", confirmado: "Confirmado", concluido: "Concluído",
+  cancelado: "Cancelado", nao_compareceu: "Não Compareceu",
+};
+const statusColor: Record<string, string> = {
+  agendado: "text-warning", confirmado: "text-primary", concluido: "text-success",
+  cancelado: "text-destructive", nao_compareceu: "text-muted-foreground",
+};
 
 export default function AgendaPage() {
-  const { items: appointments, add, update, remove, loading: la } = useAppointments();
-  const { items: clients } = useClients();
-  const { items: services } = useServices();
-  const { items: professionals } = useProfessionals();
+  const { company } = useCompanyContext();
+  const { items: appointments, add, update, remove, loading: la } = useAppointments(company?.id);
+  const { items: clients } = useClients(company?.id);
+  const { items: services } = useServices(company?.id);
+  const { items: professionals } = useProfessionals(company?.id);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Appointment | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -49,7 +68,7 @@ export default function AgendaPage() {
       await update(editing.id, form);
       toast({ title: "Agendamento atualizado" });
     } else {
-      await add(form as any);
+      await add({ ...form, companyId: company?.id || "" } as any);
       toast({ title: "Agendamento criado" });
     }
     setOpen(false);
@@ -66,9 +85,6 @@ export default function AgendaPage() {
   };
   const getServiceName = (id: string) => services.find((s) => s.id === id)?.name ?? "—";
   const getProfessionalName = (id: string) => professionals.find((p) => p.id === id)?.name ?? "—";
-
-  const statusLabel: Record<string, string> = { agendado: "Agendado", concluido: "Concluído", cancelado: "Cancelado" };
-  const statusColor: Record<string, string> = { agendado: "text-warning", concluido: "text-success", cancelado: "text-destructive" };
 
   const sorted = [...appointments].sort((a, b) => {
     const da = `${a.date}T${a.time}`;
@@ -143,12 +159,12 @@ export default function AgendaPage() {
                 {editing && (
                   <div className="space-y-2">
                     <Label>Status</Label>
-                    <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as Appointment["status"] })}>
+                    <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as AppointmentStatus })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="agendado">Agendado</SelectItem>
-                        <SelectItem value="concluido">Concluído</SelectItem>
-                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                        {statusOptions.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -185,8 +201,8 @@ export default function AgendaPage() {
                     {a.clientPhone && <p className="text-xs text-muted-foreground">📱 {a.clientPhone}</p>}
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`text-xs font-semibold ${statusColor[a.status]}`}>
-                      {statusLabel[a.status]}
+                    <span className={`text-xs font-semibold ${statusColor[a.status] || "text-muted-foreground"}`}>
+                      {statusLabel[a.status] || a.status}
                     </span>
                     <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></Button>

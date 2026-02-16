@@ -1,15 +1,44 @@
-// Tipos do sistema de agendamento
+// Tipos do sistema de agendamento multi-tenant
+
+export type AppRole = "admin" | "profissional" | "recepcionista" | "user";
+export type AppointmentStatus = "agendado" | "confirmado" | "concluido" | "cancelado" | "nao_compareceu";
+export type SubscriptionStatus = "free" | "pro" | "premium";
+
+export interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
+  phone: string;
+  address: string;
+  workingHoursStart: string;
+  workingHoursEnd: string;
+  slotDuration: number;
+  slotInterval: number;
+  subscriptionStatus: SubscriptionStatus;
+  maxAppointmentsMonth?: number;
+}
+
+export interface CompanyMember {
+  id: string;
+  companyId: string;
+  userId: string;
+  role: AppRole;
+}
 
 export interface User {
   id: string;
   name: string;
-  phone: string; // usado como login
-  cpf: string; // usado como senha
-  role: "admin" | "user";
+  email: string;
+  phone: string;
+  cpf: string;
+  role: AppRole;
+  companyId?: string;
 }
 
 export interface Professional {
   id: string;
+  companyId: string;
   name: string;
   role: string;
   avatar?: string;
@@ -18,6 +47,7 @@ export interface Professional {
 
 export interface Service {
   id: string;
+  companyId: string;
   name: string;
   duration: number;
   price: number;
@@ -26,6 +56,7 @@ export interface Service {
 
 export interface Client {
   id: string;
+  companyId: string;
   name: string;
   email: string;
   phone: string;
@@ -34,12 +65,13 @@ export interface Client {
 
 export interface Appointment {
   id: string;
+  companyId: string;
   clientId: string;
   serviceId: string;
   professionalId: string;
   date: string;
   time: string;
-  status: "agendado" | "concluido" | "cancelado";
+  status: AppointmentStatus;
   notes: string;
   clientName?: string;
   clientPhone?: string;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useClients } from "@/hooks/useSupabaseData";
+import { useClients } from "@/services/supabaseData";
+import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Client } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 const emptyClient = { name: "", email: "", phone: "", notes: "" };
 
 export default function ClientsPage() {
-  const { items: clients, add, update, remove, loading } = useClients();
+  const { company } = useCompanyContext();
+  const { items: clients, add, update, remove, loading } = useClients(company?.id);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [form, setForm] = useState(emptyClient);

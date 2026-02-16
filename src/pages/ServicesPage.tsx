@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useServices } from "@/hooks/useSupabaseData";
+import { useServices } from "@/services/supabaseData";
+import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Service } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 const emptyService = { name: "", duration: 30, price: 0, description: "" };
 
 export default function ServicesPage() {
-  const { items: services, add, update, remove, loading } = useServices();
+  const { company } = useCompanyContext();
+  const { items: services, add, update, remove, loading } = useServices(company?.id);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
   const [form, setForm] = useState(emptyService);

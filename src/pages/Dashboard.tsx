@@ -1,4 +1,5 @@
-import { useServices, useProfessionals, useClients, useAppointments } from "@/hooks/useSupabaseData";
+import { useServices, useProfessionals, useClients, useAppointments } from "@/services/supabaseData";
+import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Appointment } from "@/types";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,12 +8,13 @@ import { Link } from "react-router-dom";
 import { Scissors, Users, CalendarDays, Clock, CheckCircle, XCircle, UserCircle, ExternalLink, Loader2 } from "lucide-react";
 
 export default function Dashboard() {
-  const { items: services, loading: ls } = useServices();
-  const { items: clients, loading: lc } = useClients();
-  const { items: appointments, loading: la } = useAppointments();
-  const { items: professionals, loading: lp } = useProfessionals();
+  const { company, loading: companyLoading } = useCompanyContext();
+  const { items: services, loading: ls } = useServices(company?.id);
+  const { items: clients, loading: lc } = useClients(company?.id);
+  const { items: appointments, loading: la } = useAppointments(company?.id);
+  const { items: professionals, loading: lp } = useProfessionals(company?.id);
 
-  const loading = ls || lc || la || lp;
+  const loading = ls || lc || la || lp || companyLoading;
 
   const today = new Date().toISOString().split("T")[0];
   const todayAppointments = appointments.filter((a) => a.date === today && a.status === "agendado");
@@ -37,15 +39,19 @@ export default function Dashboard() {
     return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
   }
 
+  const bookingLink = company?.slug ? `/agendamento/${company.slug}` : "/agendar";
+
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-heading text-2xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground text-sm mt-1">Visão geral do sistema</p>
+            <p className="text-muted-foreground text-sm mt-1">
+              {company?.name ? `${company.name} — Visão geral` : "Visão geral do sistema"}
+            </p>
           </div>
-          <Link to="/agendar" target="_blank">
+          <Link to={bookingLink} target="_blank">
             <Button variant="outline" className="gap-2">
               <ExternalLink className="h-4 w-4" />
               Link de Agendamento

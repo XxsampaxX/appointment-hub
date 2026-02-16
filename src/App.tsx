@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "@/contexts/AuthContext";
+import { CompanyProvider, useCompanyContext } from "@/contexts/CompanyContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -11,53 +12,70 @@ import ServicesPage from "./pages/ServicesPage";
 import ClientsPage from "./pages/ClientsPage";
 import AgendaPage from "./pages/AgendaPage";
 import ProfessionalsPage from "./pages/ProfessionalsPage";
-import BookingPage from "./pages/BookingPage";
 import UserBookingPage from "./pages/UserBookingPage";
+import PublicBookingPage from "./pages/PublicBookingPage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
+function LoadingScreen() {
+  return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+}
+
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, currentUser, loading } = useAuthContext();
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  const { isAuthenticated, loading } = useAuthContext();
+  const { companyRole, loading: companyLoading } = useCompanyContext();
+  if (loading || companyLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to="/" replace />;
-  if (currentUser?.role !== "admin") return <Navigate to="/meus-agendamentos" replace />;
+  if (companyRole !== "admin") return <Navigate to="/meus-agendamentos" replace />;
+  return <>{children}</>;
+}
+
+function StaffRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuthContext();
+  const { companyRole, loading: companyLoading } = useCompanyContext();
+  if (loading || companyLoading) return <LoadingScreen />;
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (!companyRole || companyRole === "user") return <Navigate to="/meus-agendamentos" replace />;
   return <>{children}</>;
 }
 
 function UserRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuthContext();
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (loading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { isAuthenticated, currentUser, loading } = useAuthContext();
+  const { isAuthenticated, loading } = useAuthContext();
+  const { companyRole, loading: companyLoading } = useCompanyContext();
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  }
+  if (loading || companyLoading) return <LoadingScreen />;
 
   const homeRedirect = isAuthenticated
-    ? currentUser?.role === "admin"
+    ? (companyRole === "admin" || companyRole === "recepcionista")
       ? "/dashboard"
       : "/meus-agendamentos"
     : undefined;
 
   return (
     <Routes>
-      <Route path="/agendar" element={<BookingPage />} />
+      {/* Public booking by slug */}
+      <Route path="/agendamento/:slug" element={<PublicBookingPage />} />
+
       <Route path="/" element={homeRedirect ? <Navigate to={homeRedirect} replace /> : <Login />} />
       <Route path="/cadastro" element={isAuthenticated ? <Navigate to={homeRedirect!} replace /> : <Register />} />
 
-      <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+      {/* Admin routes */}
+      <Route path="/dashboard" element={<StaffRoute><Dashboard /></StaffRoute>} />
       <Route path="/profissionais" element={<AdminRoute><ProfessionalsPage /></AdminRoute>} />
       <Route path="/servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
-      <Route path="/clientes" element={<AdminRoute><ClientsPage /></AdminRoute>} />
-      <Route path="/agenda" element={<AdminRoute><AgendaPage /></AdminRoute>} />
+      <Route path="/clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
+      <Route path="/agenda" element={<StaffRoute><AgendaPage /></StaffRoute>} />
 
+      {/* User routes */}
       <Route path="/meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
 
       <Route path="*" element={<NotFound />} />
@@ -72,7 +90,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes />
+          <CompanyProvider>
+            <AppRoutes />
+          </CompanyProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

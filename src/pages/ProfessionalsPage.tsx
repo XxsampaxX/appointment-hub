@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import { useProfessionals } from "@/hooks/useSupabaseData";
+import { useProfessionals } from "@/services/supabaseData";
+import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Professional } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 const emptyForm = { name: "", role: "", avatar: "", available: true };
 
 export default function ProfessionalsPage() {
-  const { items: professionals, add, update, remove, loading } = useProfessionals();
+  const { company } = useCompanyContext();
+  const { items: professionals, add, update, remove, loading } = useProfessionals(company?.id);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Professional | null>(null);
   const [form, setForm] = useState(emptyForm);
