@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { Company, AppRole } from "@/types";
@@ -7,7 +7,8 @@ interface CompanyContextType {
   company: Company | null;
   companyRole: AppRole | null;
   loading: boolean;
-  setCompanyFromSlug: (slug: string) => Promise<Company | null>;
+  slug: string | null;
+  setSlug: (slug: string) => void;
 }
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -34,10 +35,15 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   const [company, setCompany] = useState<Company | null>(null);
   const [companyRole, setCompanyRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const [slug, setSlugState] = useState<string | null>(null);
 
-  // Load company from user's membership
+  const setSlug = useCallback((newSlug: string) => {
+    setSlugState(newSlug);
+  }, []);
+
+  // Load company from slug
   useEffect(() => {
-    if (!currentUser) {
+    if (!slug) {
       setCompany(null);
       setCompanyRole(null);
       setLoading(false);
@@ -46,46 +52,39 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       setLoading(true);
-      const { data: membership } = await supabase
-        .from("company_members")
-        .select("company_id, role")
-        .eq("user_id", currentUser.id)
-        .limit(1)
+      const { data: companyData } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("slug", slug)
         .single();
 
-      if (membership) {
-        const { data: companyData } = await supabase
-          .from("companies")
-          .select("*")
-          .eq("id", membership.company_id)
-          .single();
+      if (companyData) {
+        setCompany(mapCompany(companyData));
 
-        if (companyData) {
-          setCompany(mapCompany(companyData));
-          setCompanyRole(membership.role as AppRole);
+        // Load role if user is authenticated
+        if (currentUser) {
+          const { data: membership } = await supabase
+            .from("company_members")
+            .select("role")
+            .eq("user_id", currentUser.id)
+            .eq("company_id", companyData.id)
+            .limit(1)
+            .single();
+
+          setCompanyRole(membership ? (membership.role as AppRole) : "user");
+        } else {
+          setCompanyRole(null);
         }
+      } else {
+        setCompany(null);
+        setCompanyRole(null);
       }
       setLoading(false);
     })();
-  }, [currentUser]);
-
-  const setCompanyFromSlug = async (slug: string): Promise<Company | null> => {
-    const { data } = await supabase
-      .from("companies")
-      .select("*")
-      .eq("slug", slug)
-      .single();
-
-    if (data) {
-      const mapped = mapCompany(data);
-      setCompany(mapped);
-      return mapped;
-    }
-    return null;
-  };
+  }, [slug, currentUser]);
 
   return (
-    <CompanyContext.Provider value={{ company, companyRole, loading, setCompanyFromSlug }}>
+    <CompanyContext.Provider value={{ company, companyRole, loading, slug, setSlug }}>
       {children}
     </CompanyContext.Provider>
   );

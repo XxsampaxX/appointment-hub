@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,29 +32,12 @@ export default function CompanyRegisterPage() {
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [companyName, setCompanyName] = useState<string | null>(null);
-  const [companyNotFound, setCompanyNotFound] = useState(false);
-  const [loadingCompany, setLoadingCompany] = useState(true);
 
   const { register, isAuthenticated, loading: authLoading } = useAuthContext();
-  const { setCompanyFromSlug, company } = useCompanyContext();
+  const { company } = useCompanyContext();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (!slug) return;
-    (async () => {
-      setLoadingCompany(true);
-      const found = await setCompanyFromSlug(slug);
-      if (found) {
-        setCompanyName(found.name);
-      } else {
-        setCompanyNotFound(true);
-      }
-      setLoadingCompany(false);
-    })();
-  }, [slug, setCompanyFromSlug]);
-
-  if (authLoading || loadingCompany) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -62,23 +46,7 @@ export default function CompanyRegisterPage() {
   }
 
   if (isAuthenticated && company) {
-    return <Navigate to="/meus-agendamentos" replace />;
-  }
-
-  if (companyNotFound) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md shadow-lg border-border/50">
-          <CardContent className="pt-6 text-center space-y-4">
-            <Building2 className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h2 className="text-xl font-semibold">Empresa não encontrada</h2>
-            <Link to="/">
-              <Button variant="outline" className="mt-2">Voltar ao início</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <Navigate to={`/${slug}/meus-agendamentos`} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,6 +55,17 @@ export default function CompanyRegisterPage() {
     const result = await register(name, email, phone, cpf);
     setSubmitting(false);
     if (result.success) {
+      // After registration, link user to company
+      if (company) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("company_members").insert({
+            company_id: company.id,
+            user_id: user.id,
+            role: "user",
+          });
+        }
+      }
       toast({ title: "Conta criada!", description: "Faça login para continuar." });
     } else {
       toast({ title: "Erro", description: result.message, variant: "destructive" });
@@ -100,14 +79,14 @@ export default function CompanyRegisterPage() {
           <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
             <CalendarDays className="h-7 w-7 text-primary" />
           </div>
-          {companyName && (
+          {company && (
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <Building2 className="h-4 w-4" />
-              <span>{companyName}</span>
+              <span>{company.name}</span>
             </div>
           )}
           <CardTitle className="font-heading text-2xl">Criar Conta</CardTitle>
-          <CardDescription>Cadastre-se em {companyName || "nossa empresa"}</CardDescription>
+          <CardDescription>Cadastre-se em {company?.name || "nossa empresa"}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -133,7 +112,7 @@ export default function CompanyRegisterPage() {
             </Button>
           </form>
           <div className="mt-4 text-center">
-            <Link to={`/empresa/${slug}`}>
+            <Link to={`/${slug}`}>
               <Button variant="outline" className="w-full">Já tenho conta</Button>
             </Link>
           </div>

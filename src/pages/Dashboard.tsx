@@ -15,6 +15,7 @@ export default function Dashboard() {
   const { items: professionals, loading: lp } = useProfessionals(company?.id);
 
   const loading = ls || lc || la || lp || companyLoading;
+  const slug = company?.slug || "";
 
   const today = new Date().toISOString().split("T")[0];
   const todayAppointments = appointments.filter((a) => a.date === today && a.status === "agendado");
@@ -23,9 +24,9 @@ export default function Dashboard() {
   const cancelled = appointments.filter((a) => a.status === "cancelado").length;
 
   const stats = [
-    { label: "Profissionais", value: professionals.length, icon: UserCircle, to: "/profissionais", color: "text-primary" },
-    { label: "Serviços", value: services.length, icon: Scissors, to: "/servicos", color: "text-accent" },
-    { label: "Clientes", value: clients.length, icon: Users, to: "/clientes", color: "text-warning" },
+    { label: "Profissionais", value: professionals.length, icon: UserCircle, to: `/${slug}/profissionais`, color: "text-primary" },
+    { label: "Serviços", value: services.length, icon: Scissors, to: `/${slug}/servicos`, color: "text-accent" },
+    { label: "Clientes", value: clients.length, icon: Users, to: `/${slug}/clientes`, color: "text-warning" },
   ];
 
   const getClientName = (a: Appointment) => {
@@ -39,7 +40,7 @@ export default function Dashboard() {
     return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
   }
 
-  const bookingLink = company?.slug ? `/agendamento/${company.slug}` : "/agendar";
+  const bookingLink = `/${slug}/agendar`;
 
   return (
     <Layout>
@@ -110,7 +111,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-heading">Agendamentos de Hoje</CardTitle>
-            <Link to="/agenda">
+            <Link to={`/${slug}/agenda`}>
               <Button variant="ghost" size="sm">Ver todos</Button>
             </Link>
           </CardHeader>

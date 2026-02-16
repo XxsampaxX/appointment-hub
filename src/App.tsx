@@ -5,8 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "@/contexts/AuthContext";
 import { CompanyProvider, useCompanyContext } from "@/contexts/CompanyContext";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import CompanySlugWrapper from "@/components/CompanySlugWrapper";
+import CompanyLoginPage from "./pages/CompanyLoginPage";
+import CompanyRegisterPage from "./pages/CompanyRegisterPage";
 import Dashboard from "./pages/Dashboard";
 import ServicesPage from "./pages/ServicesPage";
 import ClientsPage from "./pages/ClientsPage";
@@ -14,8 +15,6 @@ import AgendaPage from "./pages/AgendaPage";
 import ProfessionalsPage from "./pages/ProfessionalsPage";
 import UserBookingPage from "./pages/UserBookingPage";
 import PublicBookingPage from "./pages/PublicBookingPage";
-import CompanyLoginPage from "./pages/CompanyLoginPage";
-import CompanyRegisterPage from "./pages/CompanyRegisterPage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -27,65 +26,39 @@ function LoadingScreen() {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuthContext();
-  const { companyRole, loading: companyLoading } = useCompanyContext();
+  const { companyRole, loading: companyLoading, company } = useCompanyContext();
   if (loading || companyLoading) return <LoadingScreen />;
-  if (!isAuthenticated) return <Navigate to="/" replace />;
-  if (companyRole !== "admin") return <Navigate to="/meus-agendamentos" replace />;
+  if (!isAuthenticated) return <Navigate to={`/${company?.slug || ""}`} replace />;
+  if (companyRole !== "admin") return <Navigate to={`/${company?.slug}/meus-agendamentos`} replace />;
   return <>{children}</>;
 }
 
 function StaffRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuthContext();
-  const { companyRole, loading: companyLoading } = useCompanyContext();
+  const { companyRole, loading: companyLoading, company } = useCompanyContext();
   if (loading || companyLoading) return <LoadingScreen />;
-  if (!isAuthenticated) return <Navigate to="/" replace />;
-  if (!companyRole || companyRole === "user") return <Navigate to="/meus-agendamentos" replace />;
+  if (!isAuthenticated) return <Navigate to={`/${company?.slug || ""}`} replace />;
+  if (!companyRole || companyRole === "user") return <Navigate to={`/${company?.slug}/meus-agendamentos`} replace />;
   return <>{children}</>;
 }
 
 function UserRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuthContext();
+  const { company } = useCompanyContext();
   if (loading) return <LoadingScreen />;
-  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (!isAuthenticated) return <Navigate to={`/${company?.slug || ""}`} replace />;
   return <>{children}</>;
 }
 
-function AppRoutes() {
-  const { isAuthenticated, loading } = useAuthContext();
-  const { companyRole, loading: companyLoading } = useCompanyContext();
-
-  if (loading || companyLoading) return <LoadingScreen />;
-
-  const homeRedirect = isAuthenticated
-    ? (companyRole === "admin" || companyRole === "recepcionista")
-      ? "/dashboard"
-      : "/meus-agendamentos"
-    : undefined;
-
+function RootRedirect() {
   return (
-    <Routes>
-      {/* Company-specific login/register */}
-      <Route path="/empresa/:slug" element={<CompanyLoginPage />} />
-      <Route path="/empresa/:slug/cadastro" element={<CompanyRegisterPage />} />
-
-      {/* Public booking by slug */}
-      <Route path="/agendamento/:slug" element={<PublicBookingPage />} />
-
-      <Route path="/" element={homeRedirect ? <Navigate to={homeRedirect} replace /> : <Login />} />
-      <Route path="/cadastro" element={isAuthenticated ? <Navigate to={homeRedirect!} replace /> : <Register />} />
-
-      {/* Admin routes */}
-      <Route path="/dashboard" element={<StaffRoute><Dashboard /></StaffRoute>} />
-      <Route path="/profissionais" element={<AdminRoute><ProfessionalsPage /></AdminRoute>} />
-      <Route path="/servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
-      <Route path="/clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
-      <Route path="/agenda" element={<StaffRoute><AgendaPage /></StaffRoute>} />
-
-      {/* User routes */}
-      <Route path="/meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
-
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="text-center space-y-4">
+        <h1 className="font-heading text-3xl font-bold">AgendaCRM</h1>
+        <p className="text-muted-foreground">Acesse usando o link da sua empresa.</p>
+        <p className="text-sm text-muted-foreground">Exemplo: /minhaempresa</p>
+      </div>
+    </div>
   );
 }
 
@@ -97,7 +70,29 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CompanyProvider>
-            <AppRoutes />
+            <Routes>
+              <Route path="/" element={<RootRedirect />} />
+
+              {/* All company routes under /:slug */}
+              <Route path="/:slug" element={<CompanySlugWrapper />}>
+                <Route index element={<CompanyLoginPage />} />
+                <Route path="login" element={<CompanyLoginPage />} />
+                <Route path="cadastro" element={<CompanyRegisterPage />} />
+                <Route path="agendar" element={<PublicBookingPage />} />
+
+                {/* Staff/Admin routes */}
+                <Route path="admin" element={<StaffRoute><Dashboard /></StaffRoute>} />
+                <Route path="profissionais" element={<AdminRoute><ProfessionalsPage /></AdminRoute>} />
+                <Route path="servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
+                <Route path="clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
+                <Route path="agenda" element={<StaffRoute><AgendaPage /></StaffRoute>} />
+
+                {/* User routes */}
+                <Route path="meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
+              </Route>
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </CompanyProvider>
         </AuthProvider>
       </BrowserRouter>

@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useCompanyContext } from "@/contexts/CompanyContext";
 import { usePublicServices, usePublicProfessionals, usePublicAppointments } from "@/services/supabaseData";
-import type { Company, Service, Professional } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import type { Service, Professional } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, Loader2 } from "lucide-react";
@@ -15,38 +16,8 @@ type Step = "professional" | "service" | "datetime" | "confirm";
 export default function PublicBookingPage() {
   const { slug } = useParams<{ slug: string }>();
   const { currentUser, isAuthenticated } = useAuthContext();
+  const { company } = useCompanyContext();
   const { toast } = useToast();
-
-  const [company, setCompany] = useState<Company | null>(null);
-  const [loadingCompany, setLoadingCompany] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-
-  useEffect(() => {
-    if (!slug) return;
-    supabase
-      .from("companies")
-      .select("*")
-      .eq("slug", slug)
-      .single()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          setNotFound(true);
-        } else {
-          setCompany({
-            id: data.id, name: data.name, slug: data.slug,
-            logo: data.logo || undefined, phone: data.phone || "",
-            address: data.address || "",
-            workingHoursStart: typeof data.working_hours_start === "string" ? data.working_hours_start.slice(0, 5) : "09:00",
-            workingHoursEnd: typeof data.working_hours_end === "string" ? data.working_hours_end.slice(0, 5) : "18:00",
-            slotDuration: data.slot_duration || 30,
-            slotInterval: data.slot_interval || 0,
-            subscriptionStatus: data.subscription_status || "free",
-            maxAppointmentsMonth: data.max_appointments_month || undefined,
-          });
-        }
-        setLoadingCompany(false);
-      });
-  }, [slug]);
 
   const { items: services, loading: ls } = usePublicServices(company?.id);
   const { items: professionals, loading: lp } = usePublicProfessionals(company?.id);
@@ -157,24 +128,10 @@ export default function PublicBookingPage() {
     setConfirmed(false);
   };
 
-  if (loadingCompany || ls || lp || la) {
+  if (ls || lp || la) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (notFound) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="py-12 space-y-4">
-            <h1 className="font-heading text-2xl font-bold">Empresa não encontrada</h1>
-            <p className="text-muted-foreground">O link de agendamento não é válido.</p>
-            <Link to="/"><Button>Voltar ao Início</Button></Link>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -223,7 +180,7 @@ export default function PublicBookingPage() {
             <span className="font-heading font-semibold">{company?.name}</span>
           </div>
           {!isAuthenticated && (
-            <Link to="/">
+            <Link to={`/${slug}`}>
               <Button variant="outline" size="sm">Entrar</Button>
             </Link>
           )}
@@ -375,7 +332,7 @@ export default function PublicBookingPage() {
             {!isAuthenticated ? (
               <div className="text-center space-y-3">
                 <p className="text-muted-foreground text-sm">Você precisa estar logado para confirmar o agendamento.</p>
-                <Link to="/">
+                <Link to={`/${slug}`}>
                   <Button className="w-full">Fazer Login</Button>
                 </Link>
               </div>
