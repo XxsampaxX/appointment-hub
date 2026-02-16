@@ -24,10 +24,10 @@ export default function CompanyLoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const { login, isAuthenticated, loading: authLoading } = useAuthContext();
-  const { company, companyRole } = useCompanyContext();
+  const { company, companyRole, loading: companyLoading } = useCompanyContext();
   const { toast } = useToast();
 
-  if (authLoading) {
+  if (authLoading || companyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
