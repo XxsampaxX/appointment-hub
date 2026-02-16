@@ -1,23 +1,56 @@
-import { useState, useMemo } from "react";
-import { useServices, useAppointments, useProfessionals } from "@/services/supabaseData";
-import { useCompanyContext } from "@/contexts/CompanyContext";
+import { useState, useEffect, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
-import type { Appointment, Service, Professional } from "@/types";
+import { usePublicServices, usePublicProfessionals, usePublicAppointments } from "@/services/supabaseData";
+import type { Company, Service, Professional } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut, Loader2 } from "lucide-react";
+import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Step = "professional" | "service" | "datetime" | "confirm";
 
-export default function UserBookingPage() {
-  const { currentUser, logout } = useAuthContext();
-  const { company } = useCompanyContext();
-  const { items: services } = useServices(company?.id);
-  const { items: professionals } = useProfessionals(company?.id);
-  const { items: appointments, add } = useAppointments(company?.id);
+export default function PublicBookingPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const { currentUser, isAuthenticated } = useAuthContext();
   const { toast } = useToast();
+
+  const [company, setCompany] = useState<Company | null>(null);
+  const [loadingCompany, setLoadingCompany] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    supabase
+      .from("companies")
+      .select("*")
+      .eq("slug", slug)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setNotFound(true);
+        } else {
+          setCompany({
+            id: data.id, name: data.name, slug: data.slug,
+            logo: data.logo || undefined, phone: data.phone || "",
+            address: data.address || "",
+            workingHoursStart: typeof data.working_hours_start === "string" ? data.working_hours_start.slice(0, 5) : "09:00",
+            workingHoursEnd: typeof data.working_hours_end === "string" ? data.working_hours_end.slice(0, 5) : "18:00",
+            slotDuration: data.slot_duration || 30,
+            slotInterval: data.slot_interval || 0,
+            subscriptionStatus: data.subscription_status || "free",
+            maxAppointmentsMonth: data.max_appointments_month || undefined,
+          });
+        }
+        setLoadingCompany(false);
+      });
+  }, [slug]);
+
+  const { items: services, loading: ls } = usePublicServices(company?.id);
+  const { items: professionals, loading: lp } = usePublicProfessionals(company?.id);
+  const { items: busyAppointments, loading: la } = usePublicAppointments(company?.id);
 
   const [step, setStep] = useState<Step>("professional");
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
@@ -26,13 +59,6 @@ export default function UserBookingPage() {
   const [selectedTime, setSelectedTime] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const availableProfessionals = professionals.filter((p) => p.available);
-
-  const myAppointments = useMemo(
-    () => appointments.filter((a) => a.status === "agendado"),
-    [appointments]
-  );
 
   const workStart = company?.workingHoursStart || "09:00";
   const workEnd = company?.workingHoursEnd || "18:00";
@@ -44,7 +70,6 @@ export default function UserBookingPage() {
     const [endH, endM] = workEnd.split(":").map(Number);
     const startMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
-
     for (let m = startMinutes; m < endMinutes; m += slotDuration) {
       const h = Math.floor(m / 60);
       const min = m % 60;
@@ -56,11 +81,11 @@ export default function UserBookingPage() {
   const busySlots = useMemo(() => {
     if (!selectedDate || !selectedProfessional) return new Set<string>();
     return new Set(
-      appointments
-        .filter((a) => a.date === selectedDate && a.professionalId === selectedProfessional.id && a.status !== "cancelado")
+      busyAppointments
+        .filter((a) => a.date === selectedDate && a.professionalId === selectedProfessional.id)
         .map((a) => a.time)
     );
-  }, [appointments, selectedDate, selectedProfessional]);
+  }, [busyAppointments, selectedDate, selectedProfessional]);
 
   const availableDates = useMemo(() => {
     const dates: { date: string; label: string }[] = [];
@@ -79,26 +104,32 @@ export default function UserBookingPage() {
   }, []);
 
   const handleConfirm = async () => {
-    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime || !currentUser) return;
+    if (!isAuthenticated || !currentUser) {
+      toast({ title: "Faça login para agendar", description: "Você precisa estar logado.", variant: "destructive" });
+      return;
+    }
+    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime || !company) return;
     setSubmitting(true);
 
-    const { error } = await add({
-      companyId: company?.id || "",
-      clientId: "",
-      clientName: currentUser.name,
-      clientPhone: currentUser.phone,
-      serviceId: selectedService.id,
-      professionalId: selectedProfessional.id,
-      date: selectedDate,
-      time: selectedTime,
-      status: "agendado",
-      notes: "",
-    });
+    const { error } = await supabase
+      .from("appointments")
+      .insert({
+        user_id: currentUser.id,
+        company_id: company.id,
+        service_id: selectedService.id,
+        professional_id: selectedProfessional.id,
+        date: selectedDate,
+        time: selectedTime,
+        status: "agendado",
+        notes: "",
+        client_name: currentUser.name,
+        client_phone: currentUser.phone,
+      });
 
     setSubmitting(false);
     if (error) {
       if (error.message?.includes("unique") || error.code === "23505") {
-        toast({ title: "Horário indisponível", description: "Este horário já está ocupado.", variant: "destructive" });
+        toast({ title: "Horário indisponível", variant: "destructive" });
       } else {
         toast({ title: "Erro ao agendar", description: error.message, variant: "destructive" });
       }
@@ -126,8 +157,27 @@ export default function UserBookingPage() {
     setConfirmed(false);
   };
 
-  const getServiceName = (id: string) => services.find((s) => s.id === id)?.name ?? "—";
-  const getProfName = (id: string) => professionals.find((p) => p.id === id)?.name ?? "—";
+  if (loadingCompany || ls || lp || la) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="py-12 space-y-4">
+            <h1 className="font-heading text-2xl font-bold">Empresa não encontrada</h1>
+            <p className="text-muted-foreground">O link de agendamento não é válido.</p>
+            <Link to="/"><Button>Voltar ao Início</Button></Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (confirmed) {
     const whatsappLink = generateWhatsAppLink();
@@ -141,16 +191,12 @@ export default function UserBookingPage() {
             <h1 className="font-heading text-2xl font-bold">Agendamento Confirmado!</h1>
             <div className="text-muted-foreground space-y-1">
               <p><strong>{selectedService?.name}</strong> com <strong>{selectedProfessional?.name}</strong></p>
-              <p>
-                {selectedDate && new Date(selectedDate + "T00:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })} às {selectedTime}
-              </p>
+              <p>{selectedDate && new Date(selectedDate + "T00:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })} às {selectedTime}</p>
               <p className="font-medium text-primary">R$ {selectedService?.price.toFixed(2)}</p>
             </div>
             {whatsappLink && (
               <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="gap-2 mt-2">
-                  📱 Confirmar via WhatsApp
-                </Button>
+                <Button variant="outline" className="gap-2 mt-2">📱 Confirmar via WhatsApp</Button>
               </a>
             )}
             <Button onClick={reset} className="mt-4">Fazer Novo Agendamento</Button>
@@ -174,16 +220,13 @@ export default function UserBookingPage() {
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             )}
-            <span className="font-heading font-semibold">
-              {company?.name || "Agendar Horário"}
-            </span>
+            <span className="font-heading font-semibold">{company?.name}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:block">{currentUser?.name}</span>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+          {!isAuthenticated && (
+            <Link to="/">
+              <Button variant="outline" size="sm">Entrar</Button>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -198,39 +241,17 @@ export default function UserBookingPage() {
       </div>
 
       <main className="container px-4 pb-8 animate-fade-in">
-        {step === "professional" && myAppointments.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-base">Meus Agendamentos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {myAppointments.map((a) => (
-                <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 text-sm">
-                  <div>
-                    <p className="font-medium">{getServiceName(a.serviceId)}</p>
-                    <p className="text-xs text-muted-foreground">{getProfName(a.professionalId)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{new Date(a.date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}</p>
-                    <p className="text-xs text-muted-foreground">{a.time}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
         {step === "professional" && (
           <div className="space-y-4">
             <div className="text-center mb-6">
               <h2 className="font-heading text-xl font-bold">Escolha o Profissional</h2>
               <p className="text-sm text-muted-foreground">Selecione quem irá atendê-lo</p>
             </div>
-            {availableProfessionals.length === 0 ? (
+            {professionals.length === 0 ? (
               <Card><CardContent className="py-12 text-center text-muted-foreground">Nenhum profissional disponível.</CardContent></Card>
             ) : (
               <div className="grid gap-3">
-                {availableProfessionals.map((p) => (
+                {professionals.map((p) => (
                   <Card key={p.id} className="cursor-pointer transition-all hover:shadow-md" onClick={() => { setSelectedProfessional(p); setStep("service"); }}>
                     <CardContent className="flex items-center gap-4 p-4">
                       <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
@@ -255,26 +276,22 @@ export default function UserBookingPage() {
               <h2 className="font-heading text-xl font-bold">Escolha o Serviço</h2>
               <p className="text-sm text-muted-foreground">Com {selectedProfessional?.name}</p>
             </div>
-            {services.length === 0 ? (
-              <Card><CardContent className="py-12 text-center text-muted-foreground">Nenhum serviço cadastrado.</CardContent></Card>
-            ) : (
-              <div className="grid gap-3">
-                {services.map((s) => (
-                  <Card key={s.id} className="cursor-pointer transition-all hover:shadow-md" onClick={() => { setSelectedService(s); setStep("datetime"); }}>
-                    <CardContent className="flex items-center gap-4 p-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Scissors className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{s.name}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-3 w-3" /> {s.duration} min</p>
-                      </div>
-                      <p className="font-bold text-primary">R$ {s.price.toFixed(2)}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+            <div className="grid gap-3">
+              {services.map((s) => (
+                <Card key={s.id} className="cursor-pointer transition-all hover:shadow-md" onClick={() => { setSelectedService(s); setStep("datetime"); }}>
+                  <CardContent className="flex items-center gap-4 p-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Scissors className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{s.name}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-3 w-3" /> {s.duration} min</p>
+                    </div>
+                    <p className="font-bold text-primary">R$ {s.price.toFixed(2)}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
@@ -355,10 +372,19 @@ export default function UserBookingPage() {
                 </div>
               </CardContent>
             </Card>
-            <Button className="w-full" size="lg" onClick={handleConfirm} disabled={submitting}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Confirmar Agendamento
-            </Button>
+            {!isAuthenticated ? (
+              <div className="text-center space-y-3">
+                <p className="text-muted-foreground text-sm">Você precisa estar logado para confirmar o agendamento.</p>
+                <Link to="/">
+                  <Button className="w-full">Fazer Login</Button>
+                </Link>
+              </div>
+            ) : (
+              <Button className="w-full" size="lg" onClick={handleConfirm} disabled={submitting}>
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Confirmar Agendamento
+              </Button>
+            )}
           </div>
         )}
       </main>

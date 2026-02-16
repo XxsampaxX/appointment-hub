@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User as AuthUser } from "@supabase/supabase-js";
+import type { AppRole } from "@/types";
 
 interface AppUser {
   id: string;
@@ -8,7 +8,7 @@ interface AppUser {
   email: string;
   phone: string;
   cpf: string;
-  role: "admin" | "user";
+  role: AppRole;
 }
 
 interface AuthContextType {
@@ -22,12 +22,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Busca perfil + role do usuário
-// Busca perfil + role do usuário
 async function fetchUserProfile(userId: string): Promise<AppUser | null> {
-  const [profileRes, roleRes] = await Promise.all([
+  const [profileRes, memberRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userId).single(),
-    supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+    supabase.from("company_members").select("role").eq("user_id", userId).limit(1).single(),
   ]);
 
   if (profileRes.error || !profileRes.data) return null;
@@ -38,7 +36,7 @@ async function fetchUserProfile(userId: string): Promise<AppUser | null> {
     email: profileRes.data.email || "",
     phone: profileRes.data.phone,
     cpf: profileRes.data.cpf,
-    role: (roleRes.data?.role as "admin" | "user") || "user",
+    role: (memberRes.data?.role as AppRole) || "user",
   };
 }
 
@@ -46,12 +44,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Escuta mudanças de sessão
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
-          // Use setTimeout to avoid potential deadlocks with Supabase client
           setTimeout(async () => {
             const profile = await fetchUserProfile(session.user.id);
             setCurrentUser(profile);
@@ -64,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Checa sessão existente
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const profile = await fetchUserProfile(session.user.id);
@@ -78,9 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, cpf: string) => {
     const password = cpf.replace(/\D/g, "");
-
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-
     if (error) {
       return { success: false, message: "Email ou CPF incorretos." };
     }
