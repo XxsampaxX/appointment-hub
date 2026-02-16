@@ -14,6 +14,8 @@ import AgendaPage from "./pages/AgendaPage";
 import ProfessionalsPage from "./pages/ProfessionalsPage";
 import UserBookingPage from "./pages/UserBookingPage";
 import PublicBookingPage from "./pages/PublicBookingPage";
+import CompanyLoginPage from "./pages/CompanyLoginPage";
+import CompanyRegisterPage from "./pages/CompanyRegisterPage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -62,6 +64,10 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Company-specific login/register */}
+      <Route path="/empresa/:slug" element={<CompanyLoginPage />} />
+      <Route path="/empresa/:slug/cadastro" element={<CompanyRegisterPage />} />
+
       {/* Public booking by slug */}
       <Route path="/agendamento/:slug" element={<PublicBookingPage />} />
 
