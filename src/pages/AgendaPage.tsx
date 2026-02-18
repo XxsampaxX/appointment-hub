@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, User, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 
 const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as AppointmentStatus, notes: "" };
 
@@ -68,8 +69,21 @@ export default function AgendaPage() {
       await update(editing.id, form);
       toast({ title: "Agendamento atualizado" });
     } else {
+      // Get client phone for WhatsApp
+      const client = clients.find(c => c.id === form.clientId);
+      const clientPhone = client?.phone || "";
       await add({ ...form, companyId: company?.id || "" } as any);
       toast({ title: "Agendamento criado" });
+
+      // Send WhatsApp confirmation
+      if (clientPhone) {
+        sendWhatsAppConfirmation({
+          phone: clientPhone,
+          name: client?.name || "",
+          date: form.date,
+          time: form.time,
+        });
+      }
     }
     setOpen(false);
   };
