@@ -16,6 +16,7 @@ import ProfessionalsPage from "./pages/ProfessionalsPage";
 import UserBookingPage from "./pages/UserBookingPage";
 import PublicBookingPage from "./pages/PublicBookingPage";
 import NotFound from "./pages/NotFound";
+import CompanySelectPage from "./pages/CompanySelectPage";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -50,17 +51,7 @@ function UserRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function RootRedirect() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="text-center space-y-4">
-        <h1 className="font-heading text-3xl font-bold">AgendaCRM</h1>
-        <p className="text-muted-foreground">Acesse usando o link da sua empresa.</p>
-        <p className="text-sm text-muted-foreground">Exemplo: /minhaempresa</p>
-      </div>
-    </div>
-  );
-}
+// RootRedirect removed - using CompanySelectPage instead
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -71,7 +62,7 @@ const App = () => (
         <AuthProvider>
           <CompanyProvider>
             <Routes>
-              <Route path="/" element={<RootRedirect />} />
+              <Route path="/" element={<CompanySelectPage />} />
 
               {/* All company routes under /:slug */}
               <Route path="/:slug" element={<CompanySlugWrapper />}>
