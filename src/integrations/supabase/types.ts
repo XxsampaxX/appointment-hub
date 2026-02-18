@@ -342,6 +342,7 @@ export type Database = {
       whatsapp_logs: {
         Row: {
           appointment_id: string | null
+          company_id: string | null
           created_at: string
           error_message: string | null
           id: string
@@ -351,6 +352,7 @@ export type Database = {
         }
         Insert: {
           appointment_id?: string | null
+          company_id?: string | null
           created_at?: string
           error_message?: string | null
           id?: string
@@ -360,6 +362,7 @@ export type Database = {
         }
         Update: {
           appointment_id?: string | null
+          company_id?: string | null
           created_at?: string
           error_message?: string | null
           id?: string
@@ -375,11 +378,56 @@ export type Database = {
             referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "whatsapp_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      appointment_slots: {
+        Row: {
+          company_id: string | null
+          date: string | null
+          professional_id: string | null
+          status: Database["public"]["Enums"]["appointment_status"] | null
+          time: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          date?: string | null
+          professional_id?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"] | null
+          time?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          date?: string | null
+          professional_id?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"] | null
+          time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_member_role: {
