@@ -299,12 +299,11 @@ export function usePublicAppointments(companyId?: string) {
 
   useEffect(() => {
     if (!companyId) { setItems([]); setLoading(false); return; }
-    supabase.from("appointments")
+    supabase.from("appointment_slots" as any)
       .select("date, time, professional_id, status")
       .eq("company_id", companyId)
-      .neq("status", "cancelado")
       .then(({ data }) => {
-        if (data) setItems(data.map((r) => ({
+        if (data) setItems((data as any[]).map((r: any) => ({
           id: "", companyId, clientId: "", serviceId: "",
           professionalId: r.professional_id, date: r.date,
           time: typeof r.time === "string" ? r.time.slice(0, 5) : r.time,
