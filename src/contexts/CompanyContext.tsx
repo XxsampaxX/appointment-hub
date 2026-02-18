@@ -41,6 +41,11 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     setSlugState(newSlug);
   }, []);
 
+  // Set loading synchronously when deps change to prevent redirect race conditions
+  useEffect(() => {
+    setLoading(true);
+  }, [slug, currentUser]);
+
   // Load company from slug
   useEffect(() => {
     if (!slug) {
