@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 
 type Step = "professional" | "service" | "datetime" | "confirm";
 
@@ -107,6 +108,16 @@ export default function UserBookingPage() {
 
     setConfirmed(true);
     toast({ title: "Agendamento confirmado!" });
+
+    // Send WhatsApp confirmation (fire-and-forget)
+    if (currentUser?.phone) {
+      sendWhatsAppConfirmation({
+        phone: currentUser.phone,
+        name: currentUser.name || "",
+        date: selectedDate,
+        time: selectedTime,
+      });
+    }
   };
 
   const generateWhatsAppLink = () => {

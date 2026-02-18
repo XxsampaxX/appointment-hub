@@ -4,6 +4,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { usePublicServices, usePublicProfessionals, usePublicAppointments } from "@/services/supabaseData";
 import { supabase } from "@/integrations/supabase/client";
+import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 import type { Service, Professional } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,16 @@ export default function PublicBookingPage() {
 
     setConfirmed(true);
     toast({ title: "Agendamento confirmado!" });
+
+    // Send WhatsApp confirmation (fire-and-forget)
+    if (currentUser?.phone) {
+      sendWhatsAppConfirmation({
+        phone: currentUser.phone,
+        name: currentUser.name || "",
+        date: selectedDate,
+        time: selectedTime,
+      });
+    }
   };
 
   const generateWhatsAppLink = () => {
