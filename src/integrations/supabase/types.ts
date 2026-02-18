@@ -25,6 +25,7 @@ export type Database = {
           id: string
           notes: string | null
           professional_id: string
+          reminder_sent: boolean
           service_id: string
           status: Database["public"]["Enums"]["appointment_status"]
           time: string
@@ -41,6 +42,7 @@ export type Database = {
           id?: string
           notes?: string | null
           professional_id: string
+          reminder_sent?: boolean
           service_id: string
           status?: Database["public"]["Enums"]["appointment_status"]
           time: string
@@ -57,6 +59,7 @@ export type Database = {
           id?: string
           notes?: string | null
           professional_id?: string
+          reminder_sent?: boolean
           service_id?: string
           status?: Database["public"]["Enums"]["appointment_status"]
           time?: string
@@ -332,6 +335,44 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_logs: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          message_type: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_type: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_type?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_logs_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
         ]
