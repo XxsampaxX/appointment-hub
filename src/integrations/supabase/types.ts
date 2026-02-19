@@ -24,6 +24,7 @@ export type Database = {
           date: string
           id: string
           notes: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
           professional_id: string
           reminder_sent: boolean
           service_id: string
@@ -41,6 +42,7 @@ export type Database = {
           date: string
           id?: string
           notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
           professional_id: string
           reminder_sent?: boolean
           service_id: string
@@ -58,6 +60,7 @@ export type Database = {
           date?: string
           id?: string
           notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
           professional_id?: string
           reminder_sent?: boolean
           service_id?: string
@@ -455,6 +458,7 @@ export type Database = {
         | "concluido"
         | "cancelado"
         | "nao_compareceu"
+      payment_method: "pix" | "dinheiro" | "credito" | "debito"
       subscription_status: "free" | "pro" | "premium"
     }
     CompositeTypes: {
@@ -591,6 +595,7 @@ export const Constants = {
         "cancelado",
         "nao_compareceu",
       ],
+      payment_method: ["pix", "dinheiro", "credito", "debito"],
       subscription_status: ["free", "pro", "premium"],
     },
   },
