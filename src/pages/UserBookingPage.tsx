@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useServices, useAppointments, useProfessionals } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -164,7 +165,9 @@ export default function UserBookingPage() {
                 </Button>
               </a>
             )}
-            <Button onClick={reset} className="mt-4">Fazer Novo Agendamento</Button>
+            <Link to={`/${company?.slug || ""}/meus-agendamentos`}>
+              <Button className="mt-4">Acompanhar Agendamentos</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
