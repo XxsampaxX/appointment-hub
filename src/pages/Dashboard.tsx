@@ -36,11 +36,16 @@ function monthLabel(month: number) {
   return ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][month];
 }
 
-type PeriodFilter = "this_month" | "last_month" | "this_year" | "last_year";
+type PeriodFilter = "next_month" | "this_month" | "last_month" | "this_year" | "last_year";
 
 function getPeriodRange(filter: PeriodFilter) {
   const now = new Date();
   switch (filter) {
+    case "next_month": {
+      const m = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
+      const y = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+      return { start: new Date(y, m, 1), end: new Date(y, m + 1, 0), label: `${monthLabel(m)} ${y}` };
+    }
     case "this_month":
       return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: new Date(now.getFullYear(), now.getMonth() + 1, 0), label: `${monthLabel(now.getMonth())} ${now.getFullYear()}` };
     case "last_month": {
@@ -224,6 +229,7 @@ export default function Dashboard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="next_month">Mês que vem</SelectItem>
                     <SelectItem value="this_month">Este mês</SelectItem>
                     <SelectItem value="last_month">Mês anterior</SelectItem>
                     <SelectItem value="this_year">Este ano</SelectItem>
