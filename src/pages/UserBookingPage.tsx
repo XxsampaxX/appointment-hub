@@ -6,7 +6,7 @@ import type { Appointment, Service, Professional } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Scissors, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut, Loader2 } from "lucide-react";
+import { Layers, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 
@@ -274,7 +274,7 @@ export default function UserBookingPage() {
                   <Card key={s.id} className="cursor-pointer transition-all hover:shadow-md" onClick={() => { setSelectedService(s); setStep("datetime"); }}>
                     <CardContent className="flex items-center gap-4 p-4">
                       <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Scissors className="h-5 w-5 text-primary" />
+                        <Layers className="h-5 w-5 text-primary" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">{s.name}</p>
@@ -348,7 +348,7 @@ export default function UserBookingPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Scissors className="h-5 w-5 text-primary" />
+                  <Layers className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-xs text-muted-foreground">Serviço</p>
                     <p className="font-medium">{selectedService?.name} — R$ {selectedService?.price.toFixed(2)}</p>
