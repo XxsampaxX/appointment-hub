@@ -2,7 +2,7 @@ import { useState } from "react";
 import Layout from "@/components/Layout";
 import { useAppointments, useClients, useServices, useProfessionals } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";
-import type { Appointment, AppointmentStatus } from "@/types";
+import type { Appointment, AppointmentStatus, PaymentMethod } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, User, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Loader2, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 
-const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as AppointmentStatus, notes: "" };
+const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as AppointmentStatus, notes: "", paymentMethod: "" as PaymentMethod | "" };
 
 const statusOptions: { value: AppointmentStatus; label: string }[] = [
   { value: "agendado", label: "Agendado" },
@@ -22,6 +22,13 @@ const statusOptions: { value: AppointmentStatus; label: string }[] = [
   { value: "concluido", label: "Concluído" },
   { value: "cancelado", label: "Cancelado" },
   { value: "nao_compareceu", label: "Não Compareceu" },
+];
+
+const paymentMethodOptions: { value: PaymentMethod; label: string }[] = [
+  { value: "pix", label: "PIX" },
+  { value: "dinheiro", label: "Dinheiro" },
+  { value: "credito", label: "Crédito" },
+  { value: "debito", label: "Débito" },
 ];
 
 const statusLabel: Record<string, string> = {
@@ -55,6 +62,7 @@ export default function AgendaPage() {
       time: a.time,
       status: a.status,
       notes: a.notes,
+      paymentMethod: a.paymentMethod || "",
     });
     setOpen(true);
   };
@@ -65,8 +73,9 @@ export default function AgendaPage() {
       toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
       return;
     }
+    const submitData = { ...form, paymentMethod: form.paymentMethod || null };
     if (editing) {
-      await update(editing.id, form);
+      await update(editing.id, submitData as any);
       toast({ title: "Agendamento atualizado" });
     } else {
       // Get client phone for WhatsApp
@@ -184,6 +193,17 @@ export default function AgendaPage() {
                   </div>
                 )}
                 <div className="space-y-2">
+                  <Label>Forma de Pagamento</Label>
+                  <Select value={form.paymentMethod} onValueChange={(v) => setForm({ ...form, paymentMethod: v as PaymentMethod })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
+                    <SelectContent>
+                      {paymentMethodOptions.map((pm) => (
+                        <SelectItem key={pm.value} value={pm.value}>{pm.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label>Observações</Label>
                   <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
@@ -213,6 +233,11 @@ export default function AgendaPage() {
                       {new Date(a.date + "T00:00:00").toLocaleDateString("pt-BR")} às {a.time}
                     </p>
                     {a.clientPhone && <p className="text-xs text-muted-foreground">📱 {a.clientPhone}</p>}
+                    {a.paymentMethod && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Wallet className="h-3 w-3" /> {{ pix: "PIX", dinheiro: "Dinheiro", credito: "Crédito", debito: "Débito" }[a.paymentMethod]}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`text-xs font-semibold ${statusColor[a.status] || "text-muted-foreground"}`}>

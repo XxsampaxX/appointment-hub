@@ -190,6 +190,7 @@ export function useAppointments(companyId?: string) {
         date: row.date, time: typeof row.time === "string" ? row.time.slice(0, 5) : row.time,
         status: row.status, notes: row.notes || "",
         clientName: row.client_name || "", clientPhone: row.client_phone || "",
+        paymentMethod: (row as any).payment_method || null,
       })));
     }
     setLoading(false);
@@ -210,7 +211,8 @@ export function useAppointments(companyId?: string) {
       notes: appointment.notes,
       client_name: appointment.clientName || null,
       client_phone: appointment.clientPhone || null,
-    }).select().single();
+      payment_method: appointment.paymentMethod || null,
+    } as any).select().single();
     if (!error && data) {
       setItems((prev) => [...prev, {
         id: data.id, companyId: data.company_id, clientId: data.client_id || "",
@@ -218,6 +220,7 @@ export function useAppointments(companyId?: string) {
         date: data.date, time: typeof data.time === "string" ? data.time.slice(0, 5) : data.time,
         status: data.status, notes: data.notes || "",
         clientName: data.client_name || "", clientPhone: data.client_phone || "",
+        paymentMethod: (data as any).payment_method || null,
       }]);
     }
     return { data, error };
@@ -234,6 +237,7 @@ export function useAppointments(companyId?: string) {
     if (changes.notes !== undefined) dbChanges.notes = changes.notes;
     if (changes.clientName !== undefined) dbChanges.client_name = changes.clientName;
     if (changes.clientPhone !== undefined) dbChanges.client_phone = changes.clientPhone;
+    if (changes.paymentMethod !== undefined) dbChanges.payment_method = changes.paymentMethod;
     const { error } = await supabase.from("appointments").update(dbChanges).eq("id", id);
     if (!error) setItems((prev) => prev.map((i) => i.id === id ? { ...i, ...changes } : i));
     return { error };

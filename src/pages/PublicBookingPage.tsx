@@ -5,14 +5,15 @@ import { useCompanyContext } from "@/contexts/CompanyContext";
 import { usePublicServices, usePublicProfessionals, usePublicAppointments } from "@/services/supabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
-import type { Service, Professional } from "@/types";
+import type { Service, Professional, PaymentMethod } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Layers, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Layers, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, Loader2, CreditCard, Banknote, Smartphone, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type Step = "professional" | "service" | "datetime" | "confirm";
+type Step = "professional" | "service" | "datetime" | "payment" | "confirm";
 
 export default function PublicBookingPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -29,6 +30,7 @@ export default function PublicBookingPage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | "">("");
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -96,7 +98,8 @@ export default function PublicBookingPage() {
         notes: "",
         client_name: currentUser.name,
         client_phone: currentUser.phone,
-      });
+        payment_method: selectedPayment || null,
+      } as any);
 
     setSubmitting(false);
     if (error) {
@@ -136,6 +139,7 @@ export default function PublicBookingPage() {
     setSelectedService(null);
     setSelectedDate("");
     setSelectedTime("");
+    setSelectedPayment("");
     setConfirmed(false);
   };
 
@@ -183,7 +187,8 @@ export default function PublicBookingPage() {
               <Button variant="ghost" size="icon" onClick={() => {
                 if (step === "service") setStep("professional");
                 else if (step === "datetime") setStep("service");
-                else if (step === "confirm") setStep("datetime");
+                else if (step === "payment") setStep("datetime");
+                else if (step === "confirm") setStep("payment");
               }}>
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -200,9 +205,9 @@ export default function PublicBookingPage() {
 
       <div className="container px-4 py-4">
         <div className="flex gap-1">
-          {["professional", "service", "datetime", "confirm"].map((s, i) => (
+          {["professional", "service", "datetime", "payment", "confirm"].map((s, i) => (
             <div key={s} className={`h-1 flex-1 rounded-full transition-colors ${
-              ["professional", "service", "datetime", "confirm"].indexOf(step) >= i ? "bg-primary" : "bg-muted"
+              ["professional", "service", "datetime", "payment", "confirm"].indexOf(step) >= i ? "bg-primary" : "bg-muted"
             }`} />
           ))}
         </div>
@@ -302,6 +307,39 @@ export default function PublicBookingPage() {
               </div>
             )}
             {selectedDate && selectedTime && (
+              <Button className="w-full mt-4" onClick={() => setStep("payment")}>Continuar</Button>
+            )}
+          </div>
+        )}
+
+        {step === "payment" && (
+          <div className="space-y-6">
+            <div className="text-center mb-2">
+              <h2 className="font-heading text-xl font-bold">Forma de Pagamento</h2>
+              <p className="text-sm text-muted-foreground">Como deseja pagar?</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                { value: "pix" as PaymentMethod, label: "PIX", icon: Smartphone },
+                { value: "dinheiro" as PaymentMethod, label: "Dinheiro", icon: Banknote },
+                { value: "credito" as PaymentMethod, label: "Crédito", icon: CreditCard },
+                { value: "debito" as PaymentMethod, label: "Débito", icon: Wallet },
+              ]).map((pm) => (
+                <Card
+                  key={pm.value}
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    selectedPayment === pm.value ? "border-primary ring-2 ring-primary/20" : ""
+                  }`}
+                  onClick={() => setSelectedPayment(pm.value)}
+                >
+                  <CardContent className="flex flex-col items-center gap-2 p-5">
+                    <pm.icon className={`h-6 w-6 ${selectedPayment === pm.value ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className="text-sm font-medium">{pm.label}</span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {selectedPayment && (
               <Button className="w-full mt-4" onClick={() => setStep("confirm")}>Continuar</Button>
             )}
           </div>
@@ -338,6 +376,15 @@ export default function PublicBookingPage() {
                     </p>
                   </div>
                 </div>
+                {selectedPayment && (
+                  <div className="flex items-center gap-3">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Pagamento</p>
+                      <p className="font-medium">{{ pix: "PIX", dinheiro: "Dinheiro", credito: "Crédito", debito: "Débito" }[selectedPayment]}</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
             {!isAuthenticated ? (

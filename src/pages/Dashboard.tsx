@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import {
   Loader2, Copy, CalendarDays, TrendingUp, Users, Layers,
   ClipboardList, CheckCircle2, XCircle, BarChart3, Grid3X3,
-  ArrowUpRight, ArrowDownRight, LinkIcon,
+  ArrowUpRight, ArrowDownRight, LinkIcon, Wallet, CreditCard, Smartphone, Banknote,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -132,6 +132,23 @@ export default function Dashboard() {
     if (totalSlots === 0) return 0;
     return Math.min(100, Math.round((scheduled / totalSlots) * 100));
   }, [scheduled, activeProfessionals]);
+
+  // revenue by payment method
+  const paymentMethodLabels: Record<string, string> = { pix: "PIX", dinheiro: "Dinheiro", credito: "Crédito", debito: "Débito" };
+  const paymentMethodIcons: Record<string, typeof Wallet> = { pix: Smartphone, dinheiro: Banknote, credito: CreditCard, debito: Wallet };
+  const revenueByPayment = useMemo(() => {
+    const map: Record<string, number> = {};
+    periodAppointments
+      .filter((a) => a.status === "concluido")
+      .forEach((a) => {
+        const method = a.paymentMethod || "indefinido";
+        const svc = services.find((s) => s.id === a.serviceId);
+        map[method] = (map[method] || 0) + (svc?.price || 0);
+      });
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([method, total]) => ({ method, total, label: paymentMethodLabels[method] || "Não informado" }));
+  }, [periodAppointments, services]);
 
   // chart: last 7 days appointments
   const last7DaysData = useMemo(() => {
@@ -381,6 +398,33 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ── Revenue by Payment Method ── */}
+        {revenueByPayment.length > 0 && (
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Faturamento por forma de pagamento • {revPeriod.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {revenueByPayment.map((item) => {
+                  const IconComp = paymentMethodIcons[item.method] || Wallet;
+                  return (
+                    <div key={item.method} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
+                      <IconComp className="h-5 w-5 text-primary flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-bold text-foreground">{formatBRL(item.total)}</p>
+                        <p className="text-xs text-muted-foreground">{item.label}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );

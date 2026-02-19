@@ -2,6 +2,7 @@
 
 export type AppRole = "admin" | "profissional" | "recepcionista" | "user";
 export type AppointmentStatus = "agendado" | "confirmado" | "concluido" | "cancelado" | "nao_compareceu";
+export type PaymentMethod = "pix" | "dinheiro" | "credito" | "debito";
 export type SubscriptionStatus = "free" | "pro" | "premium";
 
 export interface Company {
@@ -75,6 +76,7 @@ export interface Appointment {
   notes: string;
   clientName?: string;
   clientPhone?: string;
+  paymentMethod?: PaymentMethod | null;
 }
 
 export interface BusinessSettings {
