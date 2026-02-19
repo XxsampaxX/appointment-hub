@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
-import { LayoutDashboard, Users, Scissors, CalendarDays, LogOut, UserCircle } from "lucide-react";
+import { LayoutDashboard, Users, Layers, CalendarDays, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { to: `/${slug}/admin`, label: "Dashboard", icon: LayoutDashboard },
     { to: `/${slug}/profissionais`, label: "Profissionais", icon: UserCircle },
-    { to: `/${slug}/servicos`, label: "Serviços", icon: Scissors },
+    { to: `/${slug}/servicos`, label: "Serviços", icon: Layers },
     { to: `/${slug}/clientes`, label: "Clientes", icon: Users },
     { to: `/${slug}/agenda`, label: "Agenda", icon: CalendarDays },
   ];
@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <CalendarDays className="h-6 w-6 text-primary" />
             <span className="font-heading text-lg font-bold text-foreground">
-              {company?.name || "AgendaCRM"}
+              {company?.name || "Agendya"}
             </span>
           </div>
 

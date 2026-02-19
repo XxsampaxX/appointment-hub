@@ -5,7 +5,7 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Scissors, Users, CalendarDays, Clock, CheckCircle, XCircle, UserCircle, ExternalLink, Loader2 } from "lucide-react";
+import { Layers, Users, CalendarDays, Clock, CheckCircle, XCircle, UserCircle, ExternalLink, Loader2 } from "lucide-react";
 
 export default function Dashboard() {
   const { company, loading: companyLoading } = useCompanyContext();
@@ -25,7 +25,7 @@ export default function Dashboard() {
 
   const stats = [
     { label: "Profissionais", value: professionals.length, icon: UserCircle, to: `/${slug}/profissionais`, color: "text-primary" },
-    { label: "Serviços", value: services.length, icon: Scissors, to: `/${slug}/servicos`, color: "text-accent" },
+    { label: "Serviços", value: services.length, icon: Layers, to: `/${slug}/servicos`, color: "text-accent" },
     { label: "Clientes", value: clients.length, icon: Users, to: `/${slug}/clientes`, color: "text-warning" },
   ];
 

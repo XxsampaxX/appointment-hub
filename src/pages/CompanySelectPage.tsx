@@ -40,7 +40,7 @@ export default function CompanySelectPage() {
           <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
             <CalendarDays className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="font-heading text-3xl font-bold">AgendaCRM</h1>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">AGEND<span className="text-primary">YA</span></h1>
           <p className="text-muted-foreground">Selecionar Ambiente</p>
         </div>
 
