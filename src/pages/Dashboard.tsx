@@ -75,23 +75,22 @@ export default function Dashboard() {
   const today = new Date().toISOString().split("T")[0];
   const todayAppointments = appointments.filter((a) => a.date === today && a.status !== "cancelado");
 
-  const thisMonth = new Date().getMonth();
-  const thisYear = new Date().getFullYear();
-  const monthAppointments = appointments.filter((a) => {
-    const d = new Date(a.date);
-    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-  });
-
-  const scheduled = monthAppointments.filter((a) => a.status === "agendado" || a.status === "confirmado").length;
-  const completed = appointments.filter((a) => a.status === "concluido").length;
-  const cancelled = appointments.filter((a) => a.status === "cancelado").length;
-  const activeProfessionals = professionals.filter((p) => p.available).length;
-
-  // new clients this month
-  const newClientsMonth = clients.length; // simplified — all clients count
-
-  // revenue calculation
+  // revenue & metrics period
   const revPeriod = getPeriodRange(revFilter);
+
+  // period-filtered appointments (same filter as revenue)
+  const periodAppointments = useMemo(() => {
+    return appointments.filter((a) => {
+      const d = new Date(a.date);
+      return d >= revPeriod.start && d <= revPeriod.end;
+    });
+  }, [appointments, revPeriod.start.getTime(), revPeriod.end.getTime()]);
+
+  const scheduled = periodAppointments.filter((a) => a.status === "agendado" || a.status === "confirmado").length;
+  const completed = periodAppointments.filter((a) => a.status === "concluido").length;
+  const cancelled = periodAppointments.filter((a) => a.status === "cancelado").length;
+  const activeProfessionals = professionals.filter((p) => p.available).length;
+  const newClientsMonth = clients.length;
   const revenue = useMemo(() => {
     return appointments
       .filter((a) => {
@@ -235,10 +234,10 @@ export default function Dashboard() {
             <CardContent className="p-5">
               <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium uppercase tracking-wide mb-3">
                 <CalendarDays className="h-4 w-4" />
-                Agendamentos do mês
+                Agendamentos
               </div>
               <p className="text-3xl font-bold tracking-tight text-foreground">{scheduled}</p>
-              <span className="text-xs text-muted-foreground">confirmados + agendados</span>
+              <span className="text-xs text-muted-foreground">{revPeriod.label} • agendados + confirmados</span>
             </CardContent>
           </Card>
 
@@ -292,7 +291,7 @@ export default function Dashboard() {
               <CheckCircle2 className="h-4 w-4 text-success" />
               <div>
                 <p className="text-lg font-bold text-foreground">{completed}</p>
-                <p className="text-xs text-muted-foreground">Concluídos</p>
+                <p className="text-xs text-muted-foreground">Concluídos • {revPeriod.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -301,7 +300,7 @@ export default function Dashboard() {
               <XCircle className="h-4 w-4 text-destructive" />
               <div>
                 <p className="text-lg font-bold text-foreground">{cancelled}</p>
-                <p className="text-xs text-muted-foreground">Cancelamentos</p>
+                <p className="text-xs text-muted-foreground">Cancelamentos • {revPeriod.label}</p>
               </div>
             </CardContent>
           </Card>
