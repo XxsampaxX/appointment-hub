@@ -165,9 +165,9 @@ export default function UserBookingPage() {
                 </Button>
               </a>
             )}
-            <Link to={`/${company?.slug || ""}/meus-agendamentos`}>
-              <Button className="mt-4">Acompanhar Agendamentos</Button>
-            </Link>
+            <Button asChild className="mt-4">
+              <Link to={`/${company?.slug || ""}/meus-agendamentos`}>Acompanhar Agendamentos</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
