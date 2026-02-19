@@ -36,6 +36,14 @@ export default function CompanyLoginPage() {
   }
 
   if (isAuthenticated && company) {
+    // Wait for role to be resolved before redirecting
+    if (companyRole === null) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
+    }
     const redirect = companyRole === "admin" || companyRole === "recepcionista"
       ? `/${slug}/admin`
       : `/${slug}/meus-agendamentos`;

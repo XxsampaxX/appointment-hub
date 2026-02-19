@@ -39,7 +39,9 @@ function StaffRoute({ children }: { children: React.ReactNode }) {
   const { companyRole, loading: companyLoading, company } = useCompanyContext();
   if (loading || companyLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to={`/${company?.slug || ""}`} replace />;
-  if (!companyRole || companyRole === "user") return <Navigate to={`/${company?.slug}/meus-agendamentos`} replace />;
+  // Wait for role to be fully resolved (null means still loading)
+  if (companyRole === null) return <LoadingScreen />;
+  if (companyRole === "user") return <Navigate to={`/${company?.slug}/meus-agendamentos`} replace />;
   return <>{children}</>;
 }
 
