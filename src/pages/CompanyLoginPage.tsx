@@ -101,7 +101,7 @@ export default function CompanyLoginPage() {
           </form>
           <div className="mt-4 text-center">
             <Link to={`/${slug}/cadastro`}>
-              <Button variant="outline" className="w-full">Acompanhar Agendamentos</Button>
+              <Button variant="outline" className="w-full">Criar Conta</Button>
             </Link>
           </div>
         </CardContent>

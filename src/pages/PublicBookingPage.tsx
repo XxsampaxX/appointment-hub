@@ -171,7 +171,9 @@ export default function PublicBookingPage() {
                 <Button variant="outline" className="gap-2 mt-2">📱 Confirmar via WhatsApp</Button>
               </a>
             )}
-            <Button onClick={reset} className="mt-4">Fazer Novo Agendamento</Button>
+            <Link to={`/${slug}/meus-agendamentos`}>
+              <Button className="mt-4">Acompanhar Agendamentos</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
