@@ -104,11 +104,6 @@ export default function CompanyLoginPage() {
               <Button variant="outline" className="w-full">Criar Conta</Button>
             </Link>
           </div>
-          <div className="mt-3 text-center">
-            <Link to={`/${slug}/agendar`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-              Agendar como cliente →
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
