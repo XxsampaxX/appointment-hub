@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CalendarDays, Loader2, Building2 } from "lucide-react";
+import { CalendarDays, Loader2, Building2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 function maskCpf(value: string) {
@@ -31,6 +31,8 @@ export default function CompanyRegisterPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const { register, isAuthenticated, loading: authLoading } = useAuthContext();
@@ -52,7 +54,7 @@ export default function CompanyRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const result = await register(name, email, phone, cpf);
+    const result = await register(name, email, phone, cpf, password);
     setSubmitting(false);
     if (result.success) {
       // After registration, link user to company
@@ -103,8 +105,28 @@ export default function CompanyRegisterPage() {
               <Input id="phone" value={phone} onChange={(e) => setPhone(maskPhone(e.target.value))} required disabled={submitting} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cpf">CPF (será sua senha)</Label>
-              <Input id="cpf" value={cpf} onChange={(e) => setCpf(maskCpf(e.target.value))} required disabled={submitting} />
+              <Label htmlFor="cpf">CPF</Label>
+              <Input id="cpf" value={cpf} onChange={(e) => setCpf(maskCpf(e.target.value))} disabled={submitting} placeholder="Opcional" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative">
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 8 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className="pr-10" required disabled={submitting} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="text-xs space-y-1 mt-1">
+                <p className={password.length >= 8 ? "text-green-600" : "text-muted-foreground"}>
+                  {password.length >= 8 ? "✓" : "○"} Mínimo 8 caracteres
+                </p>
+                <p className={/[A-Z]/.test(password) ? "text-green-600" : "text-muted-foreground"}>
+                  {/[A-Z]/.test(password) ? "✓" : "○"} 1 letra maiúscula
+                </p>
+                <p className={/[0-9]/.test(password) ? "text-green-600" : "text-muted-foreground"}>
+                  {/[0-9]/.test(password) ? "✓" : "○"} 1 número
+                </p>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
