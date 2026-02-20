@@ -128,30 +128,24 @@ export default function MasterAdminPage() {
   const changePlan = async (companyId: string, newPlan: string) => {
     const limits: Record<string, number | null> = {
       free: 50,
-      basic: 200,
       pro: null,
     };
 
     const { error } = await supabase
       .from("subscriptions")
-      .update({ plan: newPlan, max_appointments_month: limits[newPlan] })
+      .update({ plan: newPlan, max_appointments_month: limits[newPlan] ?? null })
       .eq("company_id", companyId);
 
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: `Plano alterado para ${newPlan.toUpperCase()}` });
+    toast({ title: `Plano alterado para ${newPlan === "free" ? "Grátis" : "Pago"}` });
     fetchData();
   };
 
-  const planColor = (plan: string) => {
-    switch (plan) {
-      case "pro": return "default";
-      case "basic": return "secondary";
-      default: return "outline";
-    }
-  };
+  const planLabel = (plan: string) => plan === "free" ? "Grátis" : "Pago";
+  const planColor = (plan: string) => plan === "free" ? "outline" as const : "default" as const;
 
   if (loading) {
     return (
@@ -244,13 +238,16 @@ export default function MasterAdminPage() {
         </div>
 
         {/* Plan Distribution */}
-        <div className="grid gap-4 sm:grid-cols-3">
-          {["free", "basic", "pro"].map((plan) => {
-            const count = companies.filter((c) => c.subscription?.plan === plan).length;
+        <div className="grid gap-4 sm:grid-cols-2">
+          {["free", "pro"].map((plan) => {
+            const count = companies.filter((c) => {
+              const p = c.subscription?.plan || "free";
+              return plan === "free" ? p === "free" : p !== "free";
+            }).length;
             return (
               <Card key={plan}>
                 <CardContent className="p-4 text-center">
-                  <Badge variant={planColor(plan)} className="mb-2">{plan.toUpperCase()}</Badge>
+                  <Badge variant={planColor(plan)} className="mb-2">{planLabel(plan)}</Badge>
                   <p className="text-3xl font-bold">{count}</p>
                   <p className="text-xs text-muted-foreground">empresas</p>
                 </CardContent>
@@ -293,9 +290,8 @@ export default function MasterAdminPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="free">Free</SelectItem>
-                            <SelectItem value="basic">Basic</SelectItem>
-                            <SelectItem value="pro">Pro</SelectItem>
+                            <SelectItem value="free">Grátis</SelectItem>
+                            <SelectItem value="pro">Pago</SelectItem>
                           </SelectContent>
                         </Select>
                       </td>
