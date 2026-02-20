@@ -18,6 +18,8 @@ import PublicBookingPage from "./pages/PublicBookingPage";
 import NotFound from "./pages/NotFound";
 import CompanySelectPage from "./pages/CompanySelectPage";
 import HomePage from "./pages/HomePage";
+import MasterAdminPage from "./pages/MasterAdminPage";
+import { useMasterAdmin } from "@/hooks/useMasterAdmin";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -54,7 +56,13 @@ function UserRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// RootRedirect removed - using CompanySelectPage instead
+function MasterRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuthContext();
+  const { isMasterAdmin, loading: masterLoading } = useMasterAdmin();
+  if (loading || masterLoading) return <LoadingScreen />;
+  if (!isAuthenticated || !isMasterAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -67,6 +75,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/empresas" element={<CompanySelectPage />} />
+              <Route path="/admin-master" element={<MasterRoute><MasterAdminPage /></MasterRoute>} />
 
               {/* All company routes under /:slug */}
               <Route path="/:slug" element={<CompanySlugWrapper />}>

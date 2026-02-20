@@ -148,6 +148,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          document: string | null
           id: string
           logo: string | null
           max_appointments_month: number | null
@@ -156,6 +157,7 @@ export type Database = {
           slot_duration: number | null
           slot_interval: number | null
           slug: string
+          status: string
           subscription_status:
             | Database["public"]["Enums"]["subscription_status"]
             | null
@@ -166,6 +168,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          document?: string | null
           id?: string
           logo?: string | null
           max_appointments_month?: number | null
@@ -174,6 +177,7 @@ export type Database = {
           slot_duration?: number | null
           slot_interval?: number | null
           slug: string
+          status?: string
           subscription_status?:
             | Database["public"]["Enums"]["subscription_status"]
             | null
@@ -184,6 +188,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          document?: string | null
           id?: string
           logo?: string | null
           max_appointments_month?: number | null
@@ -192,6 +197,7 @@ export type Database = {
           slot_duration?: number | null
           slot_interval?: number | null
           slug?: string
+          status?: string
           subscription_status?:
             | Database["public"]["Enums"]["subscription_status"]
             | null
@@ -232,6 +238,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      global_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       professionals: {
         Row: {
@@ -345,6 +372,47 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          company_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_appointments_month: number | null
+          plan: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_appointments_month?: number | null
+          plan?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_appointments_month?: number | null
+          plan?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_logs: {
         Row: {
           appointment_id: string | null
@@ -436,6 +504,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_appointment_limit: {
+        Args: { _company_id: string }
+        Returns: boolean
+      }
       get_member_role: {
         Args: { _company_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -452,6 +524,7 @@ export type Database = {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
       }
+      is_master_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "profissional" | "recepcionista" | "user"

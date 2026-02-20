@@ -11,6 +11,7 @@ import { Layers, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, Lo
 import { useToast } from "@/hooks/use-toast";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 import { enviarConfirmacaoAgendamento } from "@/services/emailService";
+import { useSubscription } from "@/hooks/useSubscription";
 
 type Step = "professional" | "service" | "datetime" | "confirm";
 
@@ -81,9 +82,19 @@ export default function UserBookingPage() {
     return dates;
   }, []);
 
+  const { checkLimit } = useSubscription(company?.id);
+
   const handleConfirm = async () => {
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime || !currentUser) return;
     setSubmitting(true);
+
+    // Check plan limit
+    const withinLimit = await checkLimit();
+    if (!withinLimit) {
+      toast({ title: "Limite atingido", description: "Esta empresa atingiu o limite de agendamentos do plano atual.", variant: "destructive" });
+      setSubmitting(false);
+      return;
+    }
 
     const { error } = await add({
       companyId: company?.id || "",

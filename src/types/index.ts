@@ -12,6 +12,8 @@ export interface Company {
   logo?: string;
   phone: string;
   address: string;
+  document: string;
+  status: "active" | "suspended";
   workingHoursStart: string;
   workingHoursEnd: string;
   slotDuration: number;

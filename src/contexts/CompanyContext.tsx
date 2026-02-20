@@ -21,6 +21,8 @@ function mapCompany(row: any): Company {
     logo: row.logo || undefined,
     phone: row.phone || "",
     address: row.address || "",
+    document: row.document || "",
+    status: row.status || "active",
     workingHoursStart: typeof row.working_hours_start === "string" ? row.working_hours_start.slice(0, 5) : "09:00",
     workingHoursEnd: typeof row.working_hours_end === "string" ? row.working_hours_end.slice(0, 5) : "18:00",
     slotDuration: row.slot_duration || 30,
