@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import AgendyaLogo from "@/components/AgendyaLogo";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   CalendarDays,
@@ -74,7 +75,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center">
-            <span className="font-bold text-xl tracking-widest text-foreground">AGEND<span className="text-primary">YA</span></span>
+            <AgendyaLogo size="md" />
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate("/empresas")}>
@@ -195,7 +196,7 @@ export default function HomePage() {
       <footer className="border-t border-border/50 bg-muted/30">
         <div className="container px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center">
-            <span className="font-bold text-lg tracking-widest text-foreground">AGEND<span className="text-primary">YA</span></span>
+            <AgendyaLogo size="sm" />
           </div>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Agendya. Todos os direitos reservados.

@@ -3,6 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { LayoutDashboard, Users, Layers, CalendarDays, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AgendyaLogo from "@/components/AgendyaLogo";
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -26,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
             <Link to="/">
-              <span className="font-bold text-xl tracking-widest text-foreground">AGEND<span className="text-primary">YA</span></span>
+              <AgendyaLogo size="md" />
             </Link>
           </div>
 
