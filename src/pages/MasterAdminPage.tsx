@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ interface CompanyWithSub extends CompanyRow {
 export default function MasterAdminPage() {
   const { currentUser, logout } = useAuthContext();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState<CompanyWithSub[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalStats, setGlobalStats] = useState({
@@ -184,7 +186,13 @@ export default function MasterAdminPage() {
       </header>
 
       <main className="container px-4 py-6 space-y-6">
-        <h1 className="text-2xl font-bold">Painel Master</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Painel Master</h1>
+          <Button onClick={() => navigate("/admin-master/nova-empresa")} className="gap-2">
+            <Building2 className="h-4 w-4" />
+            Nova Empresa
+          </Button>
+        </div>
 
         {/* KPI Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
