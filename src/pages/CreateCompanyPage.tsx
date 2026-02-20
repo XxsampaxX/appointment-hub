@@ -124,15 +124,14 @@ export default function CreateCompanyPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Plano Inicial</Label>
+                  <Label>Período</Label>
                   <Select value={plan} onValueChange={setPlan}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="free">Free (50/mês)</SelectItem>
-                      <SelectItem value="basic">Basic (200/mês)</SelectItem>
-                      <SelectItem value="pro">Pro (Ilimitado)</SelectItem>
+                      <SelectItem value="free">Grátis</SelectItem>
+                      <SelectItem value="pro">Pago</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
