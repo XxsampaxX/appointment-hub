@@ -78,11 +78,10 @@ export default function HomePage() {
             <AgendyaLogo size="md" />
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/empresas")}>
-              <Building2 className="h-4 w-4 mr-1" />
+            <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
               Entrar
             </Button>
-            <Button size="sm" onClick={() => navigate("/empresas")}>
+            <Button size="sm" onClick={() => navigate("/login")}>
               Começar Grátis
             </Button>
           </div>
@@ -108,7 +107,7 @@ export default function HomePage() {
             seguro.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button size="lg" className="gap-2 text-base" onClick={() => navigate("/empresas")}>
+            <Button size="lg" className="gap-2 text-base" onClick={() => navigate("/login")}>
               Começar Agora <ArrowRight className="h-4 w-4" />
             </Button>
             <Button size="lg" variant="outline" className="text-base" onClick={() => {
@@ -186,7 +185,7 @@ export default function HomePage() {
             Crie sua conta gratuita e comece a receber agendamentos online
             em poucos minutos.
           </p>
-          <Button size="lg" className="gap-2 text-base" onClick={() => navigate("/empresas")}>
+          <Button size="lg" className="gap-2 text-base" onClick={() => navigate("/login")}>
             Criar Minha Conta Grátis <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
