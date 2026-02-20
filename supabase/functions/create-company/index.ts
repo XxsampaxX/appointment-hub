@@ -104,12 +104,13 @@ Deno.serve(async (req) => {
     }
 
     // 4. Check if email already exists
-    const { data: existingUsers } = await adminClient.auth.admin.listUsers();
-    const emailExists = existingUsers?.users?.some(
-      (u: any) => u.email?.toLowerCase() === ownerEmail.trim().toLowerCase()
-    );
-    if (emailExists) {
-      return new Response(JSON.stringify({ error: "Email já cadastrado no sistema." }), {
+    const { data: existingUsers } = await adminClient.auth.admin.listUsers({
+      page: 1,
+      perPage: 1,
+      filter: ownerEmail.trim().toLowerCase(),
+    } as any);
+    if (existingUsers?.users?.length) {
+      return new Response(JSON.stringify({ error: "Email já cadastrado no sistema. Use outro email." }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
