@@ -42,5 +42,24 @@ export default function CompanySlugWrapper() {
     );
   }
 
+  if (company.status === "suspended") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md shadow-lg border-destructive/30">
+          <CardContent className="pt-6 text-center space-y-4">
+            <Building2 className="h-12 w-12 text-destructive mx-auto" />
+            <h2 className="text-xl font-semibold">Empresa Suspensa</h2>
+            <p className="text-muted-foreground">
+              Esta empresa está temporariamente suspensa. Entre em contato com o suporte.
+            </p>
+            <a href="/">
+              <Button variant="outline" className="mt-2">Voltar ao início</Button>
+            </a>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return <Outlet />;
 }

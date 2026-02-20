@@ -4,6 +4,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { usePublicServices, usePublicProfessionals, usePublicAppointments } from "@/services/supabaseData";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 import type { Service, Professional, PaymentMethod } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -77,6 +78,8 @@ export default function PublicBookingPage() {
     return dates;
   }, []);
 
+  const { checkLimit } = useSubscription(company?.id);
+
   const handleConfirm = async () => {
     if (!isAuthenticated || !currentUser) {
       toast({ title: "Faça login para agendar", description: "Você precisa estar logado.", variant: "destructive" });
@@ -84,6 +87,14 @@ export default function PublicBookingPage() {
     }
     if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime || !company) return;
     setSubmitting(true);
+
+    // Check plan limit
+    const withinLimit = await checkLimit();
+    if (!withinLimit) {
+      toast({ title: "Limite atingido", description: "Esta empresa atingiu o limite de agendamentos do plano atual.", variant: "destructive" });
+      setSubmitting(false);
+      return;
+    }
 
     const { error } = await supabase
       .from("appointments")
