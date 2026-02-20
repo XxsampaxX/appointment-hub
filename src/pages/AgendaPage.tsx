@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Pencil, Trash2, User, Loader2, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
+import { enviarConfirmacaoAgendamento } from "@/services/emailService";
 
 const emptyForm = { clientId: "", serviceId: "", professionalId: "", date: "", time: "", status: "agendado" as AppointmentStatus, notes: "", paymentMethod: "" as PaymentMethod | "" };
 
@@ -78,9 +79,12 @@ export default function AgendaPage() {
       await update(editing.id, submitData as any);
       toast({ title: "Agendamento atualizado" });
     } else {
-      // Get client phone for WhatsApp
+      // Get client info for notifications
       const client = clients.find(c => c.id === form.clientId);
       const clientPhone = client?.phone || "";
+      const clientEmail = client?.email || "";
+      const serviceName = services.find(s => s.id === form.serviceId)?.name || "";
+
       await add({ ...form, companyId: company?.id || "" } as any);
       toast({ title: "Agendamento criado" });
 
@@ -92,6 +96,21 @@ export default function AgendaPage() {
           date: form.date,
           time: form.time,
         });
+      }
+
+      // Send e-mail confirmation
+      if (clientEmail) {
+        const emailResult = await enviarConfirmacaoAgendamento({
+          nome: client?.name || "Cliente",
+          email: clientEmail,
+          servico: serviceName,
+          data: form.date,
+          hora: form.time,
+          nomeEmpresa: company?.name || "Empresa",
+        });
+        if (!emailResult.success) {
+          console.warn("[AgendaPage] E-mail não enviado:", emailResult.error);
+        }
       }
     }
     setOpen(false);
