@@ -17,6 +17,7 @@ import UserBookingPage from "./pages/UserBookingPage";
 import PublicBookingPage from "./pages/PublicBookingPage";
 import NotFound from "./pages/NotFound";
 import CompanySelectPage from "./pages/CompanySelectPage";
+import HomePage from "./pages/HomePage";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -64,7 +65,8 @@ const App = () => (
         <AuthProvider>
           <CompanyProvider>
             <Routes>
-              <Route path="/" element={<CompanySelectPage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/empresas" element={<CompanySelectPage />} />
 
               {/* All company routes under /:slug */}
               <Route path="/:slug" element={<CompanySlugWrapper />}>
