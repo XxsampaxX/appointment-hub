@@ -103,39 +103,45 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 4. Check if email already exists
-    const { data: existingUsers } = await adminClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1,
-      filter: ownerEmail.trim().toLowerCase(),
-    } as any);
-    if (existingUsers?.users?.length) {
-      return new Response(JSON.stringify({ error: "Email já cadastrado no sistema. Use outro email." }), {
-        status: 409,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // 4. Try to create user or reuse existing one
+    let ownerId: string;
+    let userCreated = false;
+
+    // First try to find existing user by email using admin API
+    let existingUser: any = null;
+    const { data: { users: allUsers } } = await adminClient.auth.admin.listUsers();
+    if (allUsers) {
+      existingUser = allUsers.find(
+        (u: any) => u.email?.toLowerCase() === ownerEmail.trim().toLowerCase()
+      );
     }
 
-    // 5. STEP 1 — Create user (owner)
-    const { data: newUser, error: userError } = await adminClient.auth.admin.createUser({
-      email: ownerEmail.trim(),
-      password: ownerPassword,
-      email_confirm: true,
-      user_metadata: {
-        name: ownerName.trim(),
-        phone: "",
-        cpf: "",
-      },
-    });
-
-    if (userError || !newUser?.user) {
-      return new Response(JSON.stringify({ error: `Erro ao criar usuário: ${userError?.message || "unknown"}` }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (existingUser) {
+      // Reuse existing user
+      ownerId = existingUser.id;
+    } else {
+      // Create new user
+      const { data: newUser, error: userError } = await adminClient.auth.admin.createUser({
+        email: ownerEmail.trim(),
+        password: ownerPassword,
+        email_confirm: true,
+        user_metadata: {
+          name: ownerName.trim(),
+          phone: "",
+          cpf: "",
+        },
       });
-    }
 
-    const ownerId = newUser.user.id;
+      if (userError || !newUser?.user) {
+        return new Response(JSON.stringify({ error: `Erro ao criar usuário: ${userError?.message || "unknown"}` }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      ownerId = newUser.user.id;
+      userCreated = true;
+    }
 
     // 6. STEP 2 — Create company
     const { data: companyData, error: companyError } = await adminClient
@@ -151,8 +157,8 @@ Deno.serve(async (req) => {
       .single();
 
     if (companyError || !companyData) {
-      // Rollback: delete user
-      await adminClient.auth.admin.deleteUser(ownerId);
+      // Rollback: delete user only if newly created
+      if (userCreated) await adminClient.auth.admin.deleteUser(ownerId);
       return new Response(JSON.stringify({ error: `Erro ao criar empresa: ${companyError?.message || "unknown"}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -173,7 +179,7 @@ Deno.serve(async (req) => {
     if (memberError) {
       // Rollback
       await adminClient.from("companies").delete().eq("id", companyId);
-      await adminClient.auth.admin.deleteUser(ownerId);
+      if (userCreated) await adminClient.auth.admin.deleteUser(ownerId);
       return new Response(JSON.stringify({ error: `Erro ao vincular dono: ${memberError.message}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -195,7 +201,7 @@ Deno.serve(async (req) => {
       // Rollback
       await adminClient.from("company_members").delete().eq("company_id", companyId);
       await adminClient.from("companies").delete().eq("id", companyId);
-      await adminClient.auth.admin.deleteUser(ownerId);
+      if (userCreated) await adminClient.auth.admin.deleteUser(ownerId);
       return new Response(JSON.stringify({ error: `Erro ao criar assinatura: ${subError.message}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
