@@ -57,10 +57,32 @@ export default function CreateCompanyPage() {
 
     setSubmitting(false);
 
-    if (error || data?.error) {
+    if (error) {
+      let msg = "Erro desconhecido";
+      try {
+        // For FunctionsHttpError, context contains the response body
+        const context = (error as any).context;
+        if (context && typeof context.json === "function") {
+          const body = await context.json();
+          msg = body?.error || error.message;
+        } else {
+          msg = error.message;
+        }
+      } catch {
+        msg = error.message;
+      }
       toast({
         title: "Erro ao criar empresa",
-        description: data?.error || error?.message || "Erro desconhecido",
+        description: msg,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data?.error) {
+      toast({
+        title: "Erro ao criar empresa",
+        description: data.error,
         variant: "destructive",
       });
       return;
