@@ -74,7 +74,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center">
-            <img src={agendyaLogo} alt="Agendya" className="h-8 w-auto object-contain" />
+            <span className="font-bold text-xl tracking-widest text-foreground">AGENDYA</span>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate("/empresas")}>
@@ -195,7 +195,7 @@ export default function HomePage() {
       <footer className="border-t border-border/50 bg-muted/30">
         <div className="container px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center">
-            <img src={agendyaLogo} alt="Agendya" className="h-6 w-auto object-contain" />
+            <span className="font-bold text-lg tracking-widest text-foreground">AGENDYA</span>
           </div>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Agendya. Todos os direitos reservados.
