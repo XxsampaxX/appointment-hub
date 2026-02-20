@@ -3,7 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { LayoutDashboard, Users, Layers, CalendarDays, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import agendyaLogo from "@/assets/agendya-logo.png";
+
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { currentUser, logout } = useAuthContext();
@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
             <Link to="/">
-              <img src={agendyaLogo} alt="Agendya" className="h-7 w-auto object-contain" />
+              <span className="font-bold text-xl tracking-widest text-foreground">AGEND<span className="text-primary">YA</span></span>
             </Link>
           </div>
 
