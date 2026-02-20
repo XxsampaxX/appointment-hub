@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Layers, User, Clock, ChevronLeft, ChevronRight, Check, CalendarDays, LogOut, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
+import { enviarConfirmacaoAgendamento } from "@/services/emailService";
 
 type Step = "professional" | "service" | "datetime" | "confirm";
 
@@ -118,6 +119,26 @@ export default function UserBookingPage() {
         date: selectedDate,
         time: selectedTime,
       });
+    }
+
+    // Send email confirmation (fire-and-forget)
+    if (currentUser?.email) {
+      enviarConfirmacaoAgendamento({
+        nome: currentUser.name || "",
+        email: currentUser.email,
+        servico: selectedService?.name || "",
+        data: selectedDate,
+        hora: selectedTime,
+        nomeEmpresa: company?.name || "",
+      }).then((result) => {
+        if (!result.success) {
+          console.warn("[Email] Confirmação não enviada:", result.error);
+        } else {
+          console.log("[Email] Confirmação enviada com sucesso");
+        }
+      });
+    } else {
+      console.warn("[Email] Usuário sem e-mail cadastrado, envio ignorado");
     }
   };
 
