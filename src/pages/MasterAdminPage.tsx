@@ -42,6 +42,9 @@ interface CompanyWithSub extends CompanyRow {
   subscription?: SubscriptionRow;
   appointmentCount?: number;
   memberCount?: number;
+  clientCount?: number;
+  serviceCount?: number;
+  professionalCount?: number;
 }
 
 export default function MasterAdminPage() {
@@ -61,37 +64,48 @@ export default function MasterAdminPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    const [companiesRes, subsRes, appointmentsRes, membersRes] = await Promise.all([
+    const [companiesRes, subsRes, appointmentsRes, membersRes, clientsRes, servicesRes, professionalsRes] = await Promise.all([
       supabase.from("companies").select("id, name, slug, status, document, created_at").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("*"),
       supabase.from("appointments").select("id, company_id"),
       supabase.from("company_members").select("id, company_id"),
+      supabase.from("clients").select("id, company_id"),
+      supabase.from("services").select("id, company_id"),
+      supabase.from("professionals").select("id, company_id"),
     ]);
 
     const companiesData = (companiesRes.data || []) as CompanyRow[];
     const subsData = (subsRes.data || []) as SubscriptionRow[];
     const appointmentsData = appointmentsRes.data || [];
     const membersData = membersRes.data || [];
+    const clientsData = clientsRes.data || [];
+    const servicesData = servicesRes.data || [];
+    const professionalsData = professionalsRes.data || [];
 
     // Build maps
     const subsByCompany = new Map<string, SubscriptionRow>();
     subsData.forEach((s) => subsByCompany.set(s.company_id, s));
 
-    const apptCountByCompany = new Map<string, number>();
-    appointmentsData.forEach((a: any) => {
-      apptCountByCompany.set(a.company_id, (apptCountByCompany.get(a.company_id) || 0) + 1);
-    });
+    const countByCompany = (data: any[]) => {
+      const map = new Map<string, number>();
+      data.forEach((d: any) => map.set(d.company_id, (map.get(d.company_id) || 0) + 1));
+      return map;
+    };
 
-    const memberCountByCompany = new Map<string, number>();
-    membersData.forEach((m: any) => {
-      memberCountByCompany.set(m.company_id, (memberCountByCompany.get(m.company_id) || 0) + 1);
-    });
+    const apptCountByCompany = countByCompany(appointmentsData);
+    const memberCountByCompany = countByCompany(membersData);
+    const clientCountByCompany = countByCompany(clientsData);
+    const serviceCountByCompany = countByCompany(servicesData);
+    const professionalCountByCompany = countByCompany(professionalsData);
 
     const enriched: CompanyWithSub[] = companiesData.map((c) => ({
       ...c,
       subscription: subsByCompany.get(c.id),
       appointmentCount: apptCountByCompany.get(c.id) || 0,
       memberCount: memberCountByCompany.get(c.id) || 0,
+      clientCount: clientCountByCompany.get(c.id) || 0,
+      serviceCount: serviceCountByCompany.get(c.id) || 0,
+      professionalCount: professionalCountByCompany.get(c.id) || 0,
     }));
 
     setCompanies(enriched);
@@ -270,8 +284,10 @@ export default function MasterAdminPage() {
                     <th className="p-3">Slug</th>
                     <th className="p-3">Plano</th>
                     <th className="p-3">Status</th>
+                    <th className="p-3">Clientes</th>
+                    <th className="p-3">Serviços</th>
+                    <th className="p-3">Profissionais</th>
                     <th className="p-3">Agendamentos</th>
-                    <th className="p-3">Membros</th>
                     <th className="p-3">Criada em</th>
                     <th className="p-3">Ações</th>
                   </tr>
@@ -300,8 +316,10 @@ export default function MasterAdminPage() {
                           {c.status === "active" ? "Ativa" : "Suspensa"}
                         </Badge>
                       </td>
+                      <td className="p-3">{c.clientCount}</td>
+                      <td className="p-3">{c.serviceCount}</td>
+                      <td className="p-3">{c.professionalCount}</td>
                       <td className="p-3">{c.appointmentCount}</td>
-                      <td className="p-3">{c.memberCount}</td>
                       <td className="p-3 text-muted-foreground">
                         {new Date(c.created_at).toLocaleDateString("pt-BR")}
                       </td>
