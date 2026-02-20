@@ -22,6 +22,7 @@ export type Database = {
           company_id: string
           created_at: string
           date: string
+          email_reminder_sent: boolean
           id: string
           notes: string | null
           payment_method: Database["public"]["Enums"]["payment_method"] | null
@@ -40,6 +41,7 @@ export type Database = {
           company_id: string
           created_at?: string
           date: string
+          email_reminder_sent?: boolean
           id?: string
           notes?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
@@ -58,6 +60,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           date?: string
+          email_reminder_sent?: boolean
           id?: string
           notes?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"] | null
