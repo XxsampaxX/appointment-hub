@@ -31,7 +31,21 @@ Deno.serve(async (req) => {
     const EVOLUTION_INSTANCE_NAME = Deno.env.get("EVOLUTION_INSTANCE_NAME");
 
     if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY || !EVOLUTION_INSTANCE_NAME) {
-      throw new Error("Evolution API credentials not configured");
+      console.warn("[WhatsApp] Evolution API credentials not configured, skipping.");
+      return new Response(
+        JSON.stringify({ success: false, skipped: true, reason: "credentials_not_configured" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Reject localhost/127.0.0.1 URLs — they are not reachable from the cloud
+    const isLocalUrl = /https?:\/\/(localhost|127\.0\.0\.1)/i.test(EVOLUTION_API_URL);
+    if (isLocalUrl) {
+      console.warn("[WhatsApp] EVOLUTION_API_URL is a local address and cannot be reached from the cloud. Skipping.");
+      return new Response(
+        JSON.stringify({ success: false, skipped: true, reason: "local_url_not_reachable" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const { phone, messageType, variables, appointmentId } =
