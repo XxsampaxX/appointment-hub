@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import agendyaLogo from "@/assets/agendya-logo.png";
 
 const features = [
   {
@@ -72,11 +73,8 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-6 w-6 text-primary" />
-            <span className="font-heading text-xl font-bold tracking-tight">
-              AGEND<span className="text-primary">YA</span>
-            </span>
+          <div className="flex items-center">
+            <img src={agendyaLogo} alt="Agendya" className="h-8 w-auto object-contain" />
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate("/empresas")}>
@@ -196,11 +194,8 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border/50 bg-muted/30">
         <div className="container px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
-            <span className="font-heading font-bold">
-              AGEND<span className="text-primary">YA</span>
-            </span>
+          <div className="flex items-center">
+            <img src={agendyaLogo} alt="Agendya" className="h-6 w-auto object-contain" />
           </div>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Agendya. Todos os direitos reservados.
