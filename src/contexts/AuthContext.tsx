@@ -13,8 +13,9 @@ interface AppUser {
 
 interface AuthContextType {
   currentUser: AppUser | null;
-  login: (email: string, cpf: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, email: string, phone: string, cpf: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  register: (name: string, email: string, phone: string, cpf: string, password: string) => Promise<{ success: boolean; message: string }>;
+  resetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -71,26 +72,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = useCallback(async (email: string, cpf: string) => {
-    const password = cpf.replace(/\D/g, "");
+  const login = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      return { success: false, message: "Email ou CPF incorretos." };
+      return { success: false, message: "Email ou senha inválidos." };
     }
     return { success: true, message: "Login realizado!" };
   }, []);
 
-  const register = useCallback(async (name: string, email: string, phone: string, cpf: string) => {
+  const register = useCallback(async (name: string, email: string, phone: string, cpf: string, password: string) => {
     const cleanPhone = phone.replace(/\D/g, "");
     const cleanCpf = cpf.replace(/\D/g, "");
 
-    if (!name.trim() || !email.trim() || cleanPhone.length < 10 || cleanCpf.length !== 11) {
+    if (!name.trim() || !email.trim() || cleanPhone.length < 10) {
       return { success: false, message: "Preencha todos os campos corretamente." };
+    }
+
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return { success: false, message: "A senha deve ter no mínimo 8 caracteres, 1 letra maiúscula e 1 número." };
     }
 
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
-      password: cleanCpf,
+      password,
       options: {
         data: { name: name.trim(), phone: cleanPhone, cpf: cleanCpf },
         emailRedirectTo: window.location.origin,
@@ -107,6 +111,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true, message: "Conta criada com sucesso!" };
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { success: true, message: "Se o email estiver cadastrado, você receberá um link de redefinição." };
+  }, []);
+
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setCurrentUser(null);
@@ -119,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        resetPassword,
         isAuthenticated: !!currentUser,
         loading,
       }}

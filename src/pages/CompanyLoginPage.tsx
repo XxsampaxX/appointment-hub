@@ -6,24 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CalendarDays, Mail, KeyRound, Loader2, Building2 } from "lucide-react";
+import { CalendarDays, Mail, KeyRound, Loader2, Building2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-function maskCpf(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
-  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-}
 
 export default function CompanyLoginPage() {
   const { slug } = useParams<{ slug: string }>();
   const [email, setEmail] = useState("");
-  const [cpf, setCpf] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
 
-  const { login, isAuthenticated, loading: authLoading } = useAuthContext();
+  const { login, resetPassword, isAuthenticated, loading: authLoading } = useAuthContext();
   const { company, companyRole, loading: companyLoading } = useCompanyContext();
   const { toast } = useToast();
 
@@ -36,7 +32,6 @@ export default function CompanyLoginPage() {
   }
 
   if (isAuthenticated && company) {
-    // Wait for role to be resolved before redirecting
     if (companyRole === null) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
@@ -53,12 +48,58 @@ export default function CompanyLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const result = await login(email, cpf);
+    const result = await login(email, password);
     setSubmitting(false);
     if (!result.success) {
       toast({ title: "Erro de autenticação", description: result.message, variant: "destructive" });
     }
   };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotSubmitting(true);
+    const result = await resetPassword(forgotEmail);
+    setForgotSubmitting(false);
+    toast({ title: "Verificação enviada", description: result.message });
+    setForgotMode(false);
+    setForgotEmail("");
+  };
+
+  if (forgotMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md shadow-lg border-border/50 animate-fade-in">
+          <CardHeader className="text-center space-y-3">
+            <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+              <CalendarDays className="h-7 w-7 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Esqueci minha senha</CardTitle>
+            <CardDescription>
+              Informe seu email para receber o link de redefinição
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="forgot-email" type="email" placeholder="seu@email.com" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} className="pl-10" required disabled={forgotSubmitting} />
+                </div>
+              </div>
+              <Button type="submit" className="w-full" disabled={forgotSubmitting}>
+                {forgotSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Enviar link de redefinição
+              </Button>
+            </form>
+            <div className="mt-4 text-center">
+              <Button variant="link" onClick={() => setForgotMode(false)}>Voltar ao login</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -88,11 +129,17 @@ export default function CompanyLoginPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cpf">CPF</Label>
+              <Label htmlFor="password">Senha</Label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="cpf" type="text" placeholder="000.000.000-00" value={cpf} onChange={(e) => setCpf(maskCpf(e.target.value))} className="pl-10" required disabled={submitting} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Sua senha" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required disabled={submitting} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+            </div>
+            <div className="text-right">
+              <Button variant="link" type="button" className="px-0 text-sm" onClick={() => setForgotMode(true)}>Esqueci minha senha</Button>
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
