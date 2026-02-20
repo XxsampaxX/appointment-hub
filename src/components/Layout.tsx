@@ -3,6 +3,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { LayoutDashboard, Users, Layers, CalendarDays, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import agendyaLogo from "@/assets/agendya-logo.png";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { currentUser, logout } = useAuthContext();
   const { company } = useCompanyContext();
@@ -23,8 +25,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <Link to="/" className="font-bold text-xl tracking-widest text-foreground">
-              AGENDYA
+            <Link to="/">
+              <img src={agendyaLogo} alt="Agendya" className="h-7 w-auto object-contain" />
             </Link>
           </div>
 
