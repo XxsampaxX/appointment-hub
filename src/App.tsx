@@ -18,6 +18,7 @@ import PublicBookingPage from "./pages/PublicBookingPage";
 import NotFound from "./pages/NotFound";
 import CompanySelectPage from "./pages/CompanySelectPage";
 import HomePage from "./pages/HomePage";
+import GlobalLoginPage from "./pages/GlobalLoginPage";
 import MasterAdminPage from "./pages/MasterAdminPage";
 import CreateCompanyPage from "./pages/CreateCompanyPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
@@ -76,6 +77,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/empresas" element={<CompanySelectPage />} />
+              <Route path="/login" element={<GlobalLoginPage />} />
               <Route path="/admin-master" element={<MasterRoute><MasterAdminPage /></MasterRoute>} />
               <Route path="/admin-master/nova-empresa" element={<MasterRoute><CreateCompanyPage /></MasterRoute>} />
 
