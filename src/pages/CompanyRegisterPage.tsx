@@ -32,6 +32,7 @@ export default function CompanyRegisterPage() {
   const [phone, setPhone] = useState("");
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,8 +52,18 @@ export default function CompanyRegisterPage() {
     return <Navigate to={`/${slug}/meus-agendamentos`} replace />;
   }
 
+  const passwordValid = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!passwordValid) {
+      toast({ title: "Senha fraca", description: "A senha deve ter no mínimo 8 caracteres, 1 maiúscula e 1 número.", variant: "destructive" });
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast({ title: "Senhas diferentes", description: "A senha e a confirmação não coincidem.", variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     const result = await register(name, email, phone, cpf, password);
     setSubmitting(false);
@@ -128,7 +139,16 @@ export default function CompanyRegisterPage() {
                 </p>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar senha</Label>
+              <div className="relative">
+                <Input id="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Repita a senha" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pr-10" required disabled={submitting} />
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-xs text-destructive">As senhas não coincidem</p>
+              )}
+            </div>
+            <Button type="submit" className="w-full" disabled={submitting || !passwordValid || password !== confirmPassword}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Criar Conta
             </Button>
