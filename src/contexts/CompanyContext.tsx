@@ -27,6 +27,7 @@ function mapCompany(row: any): Company {
     workingHoursEnd: typeof row.working_hours_end === "string" ? row.working_hours_end.slice(0, 5) : "18:00",
     slotDuration: row.slot_duration || 30,
     slotInterval: row.slot_interval || 0,
+    workingDays: Array.isArray(row.working_days) ? row.working_days : [1, 2, 3, 4, 5],
     subscriptionStatus: row.subscription_status || "free",
     maxAppointmentsMonth: row.max_appointments_month || undefined,
   };

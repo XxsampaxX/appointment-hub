@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import ServicesPage from "./pages/ServicesPage";
 import ClientsPage from "./pages/ClientsPage";
 import AgendaPage from "./pages/AgendaPage";
+import ScheduleSettingsPage from "./pages/ScheduleSettingsPage";
 import ProfessionalsPage from "./pages/ProfessionalsPage";
 import UserBookingPage from "./pages/UserBookingPage";
 import PublicBookingPage from "./pages/PublicBookingPage";
@@ -96,6 +97,7 @@ const App = () => (
                 <Route path="servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
                 <Route path="clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
                 <Route path="agenda" element={<StaffRoute><AgendaPage /></StaffRoute>} />
+                <Route path="horarios" element={<AdminRoute><ScheduleSettingsPage /></AdminRoute>} />
 
                 {/* User routes */}
                 <Route path="meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />

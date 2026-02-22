@@ -18,6 +18,7 @@ export interface Company {
   workingHoursEnd: string;
   slotDuration: number;
   slotInterval: number;
+  workingDays: number[];
   subscriptionStatus: SubscriptionStatus;
   maxAppointmentsMonth?: number;
 }

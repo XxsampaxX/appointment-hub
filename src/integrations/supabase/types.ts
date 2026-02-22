@@ -103,6 +103,50 @@ export type Database = {
           },
         ]
       }
+      blocked_slots: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          reason: string
+          time: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          reason: string
+          time: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          reason?: string
+          time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocked_slots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           company_id: string
@@ -163,6 +207,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_status"]
             | null
           updated_at: string
+          working_days: number[] | null
           working_hours_end: string | null
           working_hours_start: string | null
         }
@@ -184,6 +229,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_status"]
             | null
           updated_at?: string
+          working_days?: number[] | null
           working_hours_end?: string | null
           working_hours_start?: string | null
         }
@@ -205,6 +251,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_status"]
             | null
           updated_at?: string
+          working_days?: number[] | null
           working_hours_end?: string | null
           working_hours_start?: string | null
         }

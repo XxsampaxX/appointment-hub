@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { usePublicServices, usePublicProfessionals, usePublicAppointments } from "@/services/supabaseData";
+import { usePublicBlockedSlots } from "@/hooks/useBlockedSlots";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
@@ -25,6 +26,7 @@ export default function PublicBookingPage() {
   const { items: services, loading: ls } = usePublicServices(company?.id);
   const { items: professionals, loading: lp } = usePublicProfessionals(company?.id);
   const { items: busyAppointments, loading: la } = usePublicAppointments(company?.id);
+  const { items: blockedSlots } = usePublicBlockedSlots(company?.id);
 
   const [step, setStep] = useState<Step>("professional");
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
@@ -38,29 +40,35 @@ export default function PublicBookingPage() {
   const workStart = company?.workingHoursStart || "09:00";
   const workEnd = company?.workingHoursEnd || "18:00";
   const slotDuration = company?.slotDuration || 30;
-
+  const slotInterval = company?.slotInterval || 0;
+  const workingDays = company?.workingDays || [1, 2, 3, 4, 5];
   const timeSlots = useMemo(() => {
     const slots: string[] = [];
     const [startH, startM] = workStart.split(":").map(Number);
     const [endH, endM] = workEnd.split(":").map(Number);
     const startMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
-    for (let m = startMinutes; m < endMinutes; m += slotDuration) {
+    for (let m = startMinutes; m < endMinutes; m += slotDuration + slotInterval) {
       const h = Math.floor(m / 60);
       const min = m % 60;
       slots.push(`${h.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`);
     }
     return slots;
-  }, [workStart, workEnd, slotDuration]);
+  }, [workStart, workEnd, slotDuration, slotInterval]);
 
   const busySlots = useMemo(() => {
     if (!selectedDate || !selectedProfessional) return new Set<string>();
-    return new Set(
+    const busy = new Set(
       busyAppointments
         .filter((a) => a.date === selectedDate && a.professionalId === selectedProfessional.id)
         .map((a) => a.time)
     );
-  }, [busyAppointments, selectedDate, selectedProfessional]);
+    // Add blocked slots
+    blockedSlots
+      .filter((b) => b.date === selectedDate)
+      .forEach((b) => busy.add(b.time));
+    return busy;
+  }, [busyAppointments, blockedSlots, selectedDate, selectedProfessional]);
 
   const availableDates = useMemo(() => {
     const dates: { date: string; label: string }[] = [];
@@ -68,7 +76,7 @@ export default function PublicBookingPage() {
     for (let i = 0; i < 14; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      if (d.getDay() !== 0) {
+      if (workingDays.includes(d.getDay())) {
         dates.push({
           date: d.toISOString().split("T")[0],
           label: d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" }),
@@ -76,7 +84,7 @@ export default function PublicBookingPage() {
       }
     }
     return dates;
-  }, []);
+  }, [workingDays]);
 
   const { checkLimit } = useSubscription(company?.id);
 

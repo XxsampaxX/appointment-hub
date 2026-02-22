@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useCompanyContext } from "@/contexts/CompanyContext";
-import { LayoutDashboard, Users, Layers, CalendarDays, LogOut, UserCircle } from "lucide-react";
+import { LayoutDashboard, Users, Layers, CalendarDays, LogOut, UserCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AgendyaLogo from "@/components/AgendyaLogo";
 
@@ -19,6 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { to: `/${slug}/servicos`, label: "Serviços", icon: Layers },
     { to: `/${slug}/clientes`, label: "Clientes", icon: Users },
     { to: `/${slug}/agenda`, label: "Agenda", icon: CalendarDays },
+    { to: `/${slug}/horarios`, label: "Horários", icon: Clock },
   ];
 
   return (
