@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useServices, useAppointments, useProfessionals } from "@/services/supabaseData";
+import { useBlockedSlots } from "@/hooks/useBlockedSlots";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { Appointment, Service, Professional } from "@/types";
@@ -22,6 +23,7 @@ export default function UserBookingPage() {
   const { items: professionals } = useProfessionals(company?.id);
   const { items: appointments, add } = useAppointments(company?.id);
   const { toast } = useToast();
+  const { items: blockedSlots } = useBlockedSlots(company?.id);
 
   const [step, setStep] = useState<Step>("professional");
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
@@ -41,7 +43,8 @@ export default function UserBookingPage() {
   const workStart = company?.workingHoursStart || "09:00";
   const workEnd = company?.workingHoursEnd || "18:00";
   const slotDuration = company?.slotDuration || 30;
-
+  const slotInterval = company?.slotInterval || 0;
+  const workingDays = company?.workingDays || [1, 2, 3, 4, 5];
   const timeSlots = useMemo(() => {
     const slots: string[] = [];
     const [startH, startM] = workStart.split(":").map(Number);
@@ -49,22 +52,26 @@ export default function UserBookingPage() {
     const startMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
 
-    for (let m = startMinutes; m < endMinutes; m += slotDuration) {
+    for (let m = startMinutes; m < endMinutes; m += slotDuration + slotInterval) {
       const h = Math.floor(m / 60);
       const min = m % 60;
       slots.push(`${h.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}`);
     }
     return slots;
-  }, [workStart, workEnd, slotDuration]);
+  }, [workStart, workEnd, slotDuration, slotInterval]);
 
   const busySlots = useMemo(() => {
     if (!selectedDate || !selectedProfessional) return new Set<string>();
-    return new Set(
+    const busy = new Set(
       appointments
         .filter((a) => a.date === selectedDate && a.professionalId === selectedProfessional.id && a.status !== "cancelado")
         .map((a) => a.time)
     );
-  }, [appointments, selectedDate, selectedProfessional]);
+    blockedSlots
+      .filter((b) => b.active && b.date === selectedDate)
+      .forEach((b) => busy.add(b.time));
+    return busy;
+  }, [appointments, blockedSlots, selectedDate, selectedProfessional]);
 
   const availableDates = useMemo(() => {
     const dates: { date: string; label: string }[] = [];
@@ -72,7 +79,7 @@ export default function UserBookingPage() {
     for (let i = 0; i < 14; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      if (d.getDay() !== 0) {
+      if (workingDays.includes(d.getDay())) {
         dates.push({
           date: d.toISOString().split("T")[0],
           label: d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" }),
@@ -80,7 +87,7 @@ export default function UserBookingPage() {
       }
     }
     return dates;
-  }, []);
+  }, [workingDays]);
 
   const { checkLimit } = useSubscription(company?.id);
 
