@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
+import { Link } from "react-router-dom";
 import { useAppointments, useClients, useServices, useProfessionals } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Appointment, AppointmentStatus, PaymentMethod } from "@/types";
@@ -10,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, User, Loader2, Wallet } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Loader2, Wallet, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
 import { enviarConfirmacaoAgendamento } from "@/services/emailService";
@@ -146,10 +147,14 @@ export default function AgendaPage() {
             <h1 className="font-heading text-2xl font-bold">Agenda</h1>
             <p className="text-muted-foreground text-sm mt-1">Gerencie seus agendamentos</p>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openNew} className="gap-2"><Plus className="h-4 w-4" /> Novo Agendamento</Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild className="gap-2">
+              <Link to={`/${company?.slug}/horarios`}><Settings className="h-4 w-4" /> Horários</Link>
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={openNew} className="gap-2"><Plus className="h-4 w-4" /> Novo Agendamento</Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{editing ? "Editar Agendamento" : "Novo Agendamento"}</DialogTitle>
@@ -229,7 +234,8 @@ export default function AgendaPage() {
                 <Button type="submit" className="w-full">{editing ? "Salvar" : "Agendar"}</Button>
               </form>
             </DialogContent>
-          </Dialog>
+           </Dialog>
+          </div>
         </div>
 
         {sorted.length === 0 ? (
