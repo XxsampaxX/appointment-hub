@@ -132,7 +132,7 @@ export default function HomePage() {
               Implantação assistida disponível • Atendimento direto pelo WhatsApp
             </p>
           </div>
-          {companyCount !== null && companyCount > 0 && (
+          {companyCount !== null && companyCount >= 50 && (
             <p className="mt-6 text-sm text-muted-foreground">
               Já são{" "}
               <span className="font-semibold text-foreground">{companyCount}</span>{" "}
