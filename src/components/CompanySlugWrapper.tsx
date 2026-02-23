@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export default function CompanySlugWrapper() {
   const { slug } = useParams<{ slug: string }>();
-  const { company, loading, setSlug } = useCompanyContext();
+  const { company, loading, setSlug, slug: contextSlug } = useCompanyContext();
 
   useEffect(() => {
     if (slug) {
@@ -15,7 +15,7 @@ export default function CompanySlugWrapper() {
     }
   }, [slug, setSlug]);
 
-  if (loading) {
+  if (loading || (slug && contextSlug !== slug)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
