@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import AgendyaLogo from "@/components/AgendyaLogo";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -106,7 +107,12 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container flex items-center justify-between h-16 px-4">
           <AgendyaLogo size="md" />
-          <WhatsAppButton size="sm" />
+          <div className="flex items-center gap-2">
+            <Link to="/login">
+              <Button variant="outline" size="sm">Acessar Painel</Button>
+            </Link>
+            <WhatsAppButton size="sm" />
+          </div>
         </div>
       </header>
 
