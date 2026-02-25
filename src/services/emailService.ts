@@ -8,6 +8,8 @@ export interface ConfirmacaoAgendamentoParams {
   hora: string;
   nomeEmpresa: string;
   appointmentId?: string;
+  companyId?: string;
+  profissional?: string;
 }
 
 function isValidEmail(email: string): boolean {
@@ -23,7 +25,7 @@ function isValidEmail(email: string): boolean {
 export async function enviarConfirmacaoAgendamento(
   params: ConfirmacaoAgendamentoParams
 ): Promise<{ success: boolean; error?: string }> {
-  const { nome, email, servico, data, hora, nomeEmpresa, appointmentId } = params;
+  const { nome, email, servico, data, hora, nomeEmpresa, appointmentId, companyId, profissional } = params;
 
   // Validação client-side antes de chamar o backend
   if (!email || !isValidEmail(email)) {
@@ -59,6 +61,8 @@ export async function enviarConfirmacaoAgendamento(
         hora,
         nomeEmpresa,
         appointmentId,
+        companyId,
+        profissional,
       },
     });
 
