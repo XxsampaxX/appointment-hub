@@ -105,13 +105,21 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="container flex items-center justify-between h-16 px-4">
-          <AgendyaLogo size="md" />
-          <div className="flex items-center gap-2">
+        <div className="container flex items-center justify-between h-14 sm:h-16 px-4">
+          <AgendyaLogo size="sm" />
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link to="/login">
-              <Button variant="outline" size="sm">Acessar Painel</Button>
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">Acessar Painel</Button>
             </Link>
-            <WhatsAppButton size="sm" />
+            <Button
+              size="sm"
+              className="gap-1.5 text-xs sm:text-sm px-2.5 sm:px-3"
+              onClick={() => window.open(WHATSAPP_URL, "_blank")}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Entre em Contato</span>
+              <span className="sm:hidden">Contato</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -119,12 +127,12 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
-        <div className="container px-4 py-20 md:py-32 text-center relative">
+        <div className="container px-4 py-12 sm:py-20 md:py-32 text-center relative">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary mb-6">
             <Zap className="h-3.5 w-3.5" />
             Plataforma de agendamento inteligente
           </div>
-          <h1 className="font-heading text-4xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto leading-tight">
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto leading-tight">
             Nunca mais perca clientes por falta de{" "}
             <span className="text-primary">organização.</span>
           </h1>

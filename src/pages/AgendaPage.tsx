@@ -168,36 +168,36 @@ export default function AgendaPage() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="font-heading text-2xl font-bold">Agenda</h1>
-            <p className="text-muted-foreground text-sm mt-1">Gerencie seus agendamentos</p>
+            <h1 className="font-heading text-xl sm:text-2xl font-bold">Agenda</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5">Gerencie seus agendamentos</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <div className="flex border rounded-lg overflow-hidden">
               <Button
                 variant={viewMode === "calendar" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("calendar")}
-                className="rounded-none gap-1"
+                className="rounded-none gap-1 text-xs sm:text-sm px-2 sm:px-3"
               >
-                <CalendarDays className="h-4 w-4" /> Calendário
+                <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden xs:inline">Calendário</span>
               </Button>
               <Button
                 variant={viewMode === "list" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("list")}
-                className="rounded-none gap-1"
+                className="rounded-none gap-1 text-xs sm:text-sm px-2 sm:px-3"
               >
-                <List className="h-4 w-4" /> Lista
+                <List className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden xs:inline">Lista</span>
               </Button>
             </div>
-            <Button variant="outline" asChild className="gap-2">
-              <Link to={`/${company?.slug}/horarios`}><Settings className="h-4 w-4" /> Horários</Link>
+            <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Link to={`/${company?.slug}/horarios`}><Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Horários</span></Link>
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button onClick={openNew} className="gap-2"><Plus className="h-4 w-4" /> Novo Agendamento</Button>
+                <Button onClick={openNew} size="sm" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3"><Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Novo Agendamento</span><span className="sm:hidden">Novo</span></Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -288,7 +288,7 @@ export default function AgendaPage() {
             <CardContent className="p-2 sm:p-4">
               <FullCalendar
                 plugins={[timeGridPlugin, interactionPlugin]}
-                initialView="timeGridWeek"
+                initialView={window.innerWidth < 640 ? "timeGridDay" : "timeGridWeek"}
                 locale="pt-br"
                 allDaySlot={false}
                 slotMinTime={slotMin + ":00"}
