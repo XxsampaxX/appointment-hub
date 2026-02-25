@@ -112,8 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
+    const publicUrl = "https://www.agendya.com.br";
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${publicUrl}/reset-password`,
     });
     return { success: true, message: "Se o email estiver cadastrado, você receberá um link de redefinição." };
   }, []);
