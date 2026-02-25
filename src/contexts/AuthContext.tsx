@@ -112,11 +112,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    const publicUrl = "https://www.agendya.com.br";
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${publicUrl}/reset-password`,
-    });
-    return { success: true, message: "Se o email estiver cadastrado, você receberá um link de redefinição." };
+    try {
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email },
+      });
+
+      if (error) {
+        console.error("[ResetPassword] Edge function error:", error);
+        return { success: false, message: "Erro ao enviar e-mail de redefinição." };
+      }
+
+      return { success: true, message: data?.message || "Se o email estiver cadastrado, você receberá um link de redefinição." };
+    } catch (err) {
+      console.error("[ResetPassword] Unexpected error:", err);
+      return { success: false, message: "Erro ao enviar e-mail de redefinição." };
+    }
   }, []);
 
   const logout = useCallback(async () => {
