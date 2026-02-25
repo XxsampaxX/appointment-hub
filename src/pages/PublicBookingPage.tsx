@@ -7,6 +7,7 @@ import { usePublicBlockedSlots } from "@/hooks/useBlockedSlots";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
 import { sendWhatsAppConfirmation } from "@/services/whatsappService";
+import { enviarConfirmacaoAgendamento } from "@/services/emailService";
 import type { Service, Professional, PaymentMethod } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -142,6 +143,18 @@ export default function PublicBookingPage() {
         time: selectedTime,
       });
     }
+
+    // Send email notification to company owner (fire-and-forget)
+    enviarConfirmacaoAgendamento({
+      nome: currentUser?.name || "Cliente",
+      email: currentUser?.email || "",
+      servico: selectedService?.name || "",
+      data: selectedDate,
+      hora: selectedTime,
+      nomeEmpresa: company?.name || "",
+      companyId: company?.id,
+      profissional: selectedProfessional?.name,
+    }).catch((err) => console.warn("[PublicBooking] Email error:", err));
   };
 
   const generateWhatsAppLink = () => {

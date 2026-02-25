@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -12,13 +14,14 @@ interface EmailRequest {
   hora: string;
   nomeEmpresa: string;
   appointmentId?: string;
+  companyId?: string;
+  profissional?: string;
 }
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-/** Returns true if the `from` address uses a custom verified domain (not resend.dev) */
 function isCustomDomain(fromEmail: string): boolean {
   return !fromEmail.includes("@resend.dev") && !fromEmail.includes("@onboarding.resend.dev");
 }
@@ -98,6 +101,83 @@ function buildHtmlTemplate(params: {
   `.trim();
 }
 
+function buildOwnerHtmlTemplate(params: {
+  clienteNome: string;
+  servico: string;
+  data: string;
+  hora: string;
+  nomeEmpresa: string;
+  profissional?: string;
+}): string {
+  const { clienteNome, servico, data, hora, nomeEmpresa, profissional } = params;
+  const profRow = profissional
+    ? `<tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;"><span style="font-size:13px;color:#6b7280;display:block;margin-bottom:2px;">Profissional</span><span style="font-size:16px;font-weight:600;color:#111827;">${profissional}</span></td></tr>`
+    : "";
+  return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Novo Agendamento</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#059669 0%,#10b981 100%);padding:40px 40px 32px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:14px;color:rgba(255,255,255,0.8);letter-spacing:2px;text-transform:uppercase;">Agendya</p>
+              <h1 style="margin:0;font-size:28px;font-weight:700;color:#ffffff;">Novo Agendamento 📅</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 24px;font-size:16px;color:#374151;line-height:1.6;">
+                Um novo agendamento foi realizado na <strong>${nomeEmpresa}</strong>.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;overflow:hidden;margin-bottom:32px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;"><span style="font-size:13px;color:#6b7280;display:block;margin-bottom:2px;">Cliente</span><span style="font-size:16px;font-weight:600;color:#111827;">${clienteNome}</span></td></tr>
+                      <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;"><span style="font-size:13px;color:#6b7280;display:block;margin-bottom:2px;">Serviço</span><span style="font-size:16px;font-weight:600;color:#111827;">${servico}</span></td></tr>
+                      ${profRow}
+                      <tr><td style="padding:10px 0;border-bottom:1px solid #e5e7eb;"><span style="font-size:13px;color:#6b7280;display:block;margin-bottom:2px;">Data</span><span style="font-size:16px;font-weight:600;color:#111827;">${data}</span></td></tr>
+                      <tr><td style="padding:10px 0;"><span style="font-size:13px;color:#6b7280;display:block;margin-bottom:2px;">Horário</span><span style="font-size:16px;font-weight:600;color:#111827;">${hora}</span></td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <a href="https://agendya.com.br" style="display:inline-block;background:linear-gradient(135deg,#059669 0%,#10b981 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;">
+                      Ver na Agendya
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 40px;text-align:center;">
+              <p style="margin:0;font-size:13px;color:#9ca3af;">
+                Enviado por <strong style="color:#059669;">Agendya</strong> · Sistema de Agendamentos Online
+              </p>
+              <p style="margin:8px 0 0;font-size:12px;color:#d1d5db;">Este é um e-mail automático, por favor não responda.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
 async function sendEmail(params: {
   resendApiKey: string;
   fromAddress: string;
@@ -128,6 +208,35 @@ async function sendEmail(params: {
 
   console.log(`[Email] Sent successfully. Resend ID: ${resendData.id}`);
   return { ok: true, data: resendData };
+}
+
+async function getCompanyOwnerEmail(companyId: string): Promise<string | null> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) return null;
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const { data: company } = await supabase
+      .from("companies")
+      .select("created_by")
+      .eq("id", companyId)
+      .single();
+
+    if (!company?.created_by) return null;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", company.created_by)
+      .single();
+
+    return profile?.email || null;
+  } catch (err) {
+    console.error("[Email] Error fetching owner email:", err);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -209,7 +318,7 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as EmailRequest;
-    const { to, nome, servico, data, hora, nomeEmpresa, appointmentId } = body;
+    const { to, nome, servico, data, hora, nomeEmpresa, appointmentId, companyId, profissional } = body;
 
     if (!to || !nome || !servico || !data || !hora || !nomeEmpresa) {
       return new Response(
@@ -225,8 +334,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // If using the test domain, the Resend API only allows sending to the account owner.
-    // In that case we skip rather than fail so booking still completes.
     if (!isCustomDomain(FROM_ADDRESS)) {
       console.warn(
         `[Email] Using test domain '${FROM_ADDRESS}'. Resend only allows sending to the account owner email. ` +
@@ -244,26 +351,60 @@ Deno.serve(async (req) => {
       );
     }
 
-    const html = buildHtmlTemplate({ nome, servico, data, hora, nomeEmpresa });
-
-    const result = await sendEmail({
+    // 1) Send confirmation email to the client
+    const clientHtml = buildHtmlTemplate({ nome, servico, data, hora, nomeEmpresa });
+    const clientResult = await sendEmail({
       resendApiKey: RESEND_API_KEY,
       fromAddress: FROM_ADDRESS,
       to,
       subject: `Agendamento Confirmado ✅ - ${nomeEmpresa}`,
-      html,
+      html: clientHtml,
       appointmentId,
     });
 
-    if (!result.ok) {
+    // 2) Send notification email to the company owner
+    let ownerEmailSent = false;
+    if (companyId) {
+      const ownerEmail = await getCompanyOwnerEmail(companyId);
+      if (ownerEmail && isValidEmail(ownerEmail) && ownerEmail.trim().toLowerCase() !== to.trim().toLowerCase()) {
+        const ownerHtml = buildOwnerHtmlTemplate({
+          clienteNome: nome,
+          servico,
+          data,
+          hora,
+          nomeEmpresa,
+          profissional,
+        });
+        const ownerResult = await sendEmail({
+          resendApiKey: RESEND_API_KEY,
+          fromAddress: FROM_ADDRESS,
+          to: ownerEmail,
+          subject: `Novo Agendamento 📅 - ${nome} | ${nomeEmpresa}`,
+          html: ownerHtml,
+          appointmentId,
+        });
+        ownerEmailSent = ownerResult.ok;
+        if (!ownerResult.ok) {
+          console.warn("[Email] Failed to send owner notification:", ownerResult.error);
+        }
+      } else {
+        console.log(`[Email] Owner email skipped (not found, invalid, or same as client)`);
+      }
+    }
+
+    if (!clientResult.ok) {
       return new Response(
-        JSON.stringify({ error: "Failed to send email", details: result.error }),
+        JSON.stringify({ error: "Failed to send email", details: clientResult.error }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     return new Response(
-      JSON.stringify({ success: true, emailId: (result.data as { id: string }).id }),
+      JSON.stringify({
+        success: true,
+        emailId: (clientResult.data as { id: string }).id,
+        ownerNotified: ownerEmailSent,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

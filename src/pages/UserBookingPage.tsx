@@ -148,6 +148,8 @@ export default function UserBookingPage() {
         data: selectedDate,
         hora: selectedTime,
         nomeEmpresa: company?.name || "",
+        companyId: company?.id,
+        profissional: selectedProfessional?.name,
       }).then((result) => {
         if (!result.success) {
           console.warn("[Email] Confirmação não enviada:", result.error);

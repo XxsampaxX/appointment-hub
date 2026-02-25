@@ -108,6 +108,7 @@ export default function AgendaPage() {
         const emailResult = await enviarConfirmacaoAgendamento({
           nome: client?.name || "Cliente", email: clientEmail, servico: serviceName,
           data: form.date, hora: form.time, nomeEmpresa: company?.name || "Empresa",
+          companyId: company?.id, profissional: professionals.find(p => p.id === form.professionalId)?.name,
         });
         if (!emailResult.success) console.warn("[AgendaPage] E-mail não enviado:", emailResult.error);
       }
