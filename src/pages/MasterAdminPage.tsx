@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Ban,
   CheckCircle2,
+  Clock,
 } from "lucide-react";
 
 interface CompanyRow {
@@ -57,6 +58,7 @@ export default function MasterAdminPage() {
     totalCompanies: 0,
     activeCompanies: 0,
     suspendedCompanies: 0,
+    pendingCompanies: 0,
     totalAppointments: 0,
     totalUsers: 0,
   });
@@ -113,6 +115,7 @@ export default function MasterAdminPage() {
       totalCompanies: companiesData.length,
       activeCompanies: companiesData.filter((c) => c.status === "active").length,
       suspendedCompanies: companiesData.filter((c) => c.status === "suspended").length,
+      pendingCompanies: companiesData.filter((c) => c.status === "pending").length,
       totalAppointments: appointmentsData.length,
       totalUsers: membersData.length,
     });
@@ -136,6 +139,34 @@ export default function MasterAdminPage() {
       return;
     }
     toast({ title: newStatus === "active" ? "Empresa ativada" : "Empresa suspensa" });
+    fetchData();
+  };
+
+  const approveCompany = async (company: CompanyWithSub) => {
+    const { error } = await supabase
+      .from("companies")
+      .update({ status: "active" })
+      .eq("id", company.id);
+
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Empresa aprovada com sucesso!" });
+    fetchData();
+  };
+
+  const rejectCompany = async (company: CompanyWithSub) => {
+    // Delete subscription, members, then company
+    await supabase.from("subscriptions").delete().eq("company_id", company.id);
+    await supabase.from("company_members").delete().eq("company_id", company.id);
+    const { error } = await supabase.from("companies").delete().eq("id", company.id);
+
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Empresa reprovada e removida" });
     fetchData();
   };
 
@@ -203,7 +234,7 @@ export default function MasterAdminPage() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <Building2 className="h-8 w-8 text-primary" />
@@ -219,6 +250,15 @@ export default function MasterAdminPage() {
               <div>
                 <p className="text-2xl font-bold">{globalStats.activeCompanies}</p>
                 <p className="text-xs text-muted-foreground">Ativas</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={globalStats.pendingCompanies > 0 ? "border-amber-500/50 bg-amber-500/5" : ""}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <Clock className={`h-8 w-8 ${globalStats.pendingCompanies > 0 ? "text-amber-500" : "text-muted-foreground"}`} />
+              <div>
+                <p className="text-2xl font-bold">{globalStats.pendingCompanies}</p>
+                <p className="text-xs text-muted-foreground">Pendentes</p>
               </div>
             </CardContent>
           </Card>
@@ -270,6 +310,40 @@ export default function MasterAdminPage() {
           })}
         </div>
 
+        {/* Pending Companies */}
+        {companies.filter((c) => c.status === "pending").length > 0 && (
+          <Card className="border-amber-500/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-amber-500" />
+                Empresas Aguardando Aprovação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {companies.filter((c) => c.status === "pending").map((c) => (
+                  <div key={c.id} className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                    <div>
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-sm text-muted-foreground">Slug: {c.slug} • {new Date(c.created_at).toLocaleDateString("pt-BR")}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => approveCompany(c)} className="gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Aprovar
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => rejectCompany(c)} className="gap-1">
+                        <Ban className="h-3.5 w-3.5" />
+                        Reprovar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Companies Table */}
         <Card>
           <CardHeader>
@@ -312,8 +386,8 @@ export default function MasterAdminPage() {
                         </Select>
                       </td>
                       <td className="p-3">
-                        <Badge variant={c.status === "active" ? "default" : "destructive"}>
-                          {c.status === "active" ? "Ativa" : "Suspensa"}
+                        <Badge variant={c.status === "active" ? "default" : c.status === "pending" ? "outline" : "destructive"}>
+                          {c.status === "active" ? "Ativa" : c.status === "pending" ? "Pendente" : "Suspensa"}
                         </Badge>
                       </td>
                       <td className="p-3">{c.clientCount}</td>

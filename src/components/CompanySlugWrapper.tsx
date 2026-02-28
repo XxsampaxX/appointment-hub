@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams, Outlet } from "react-router-dom";
 import { useCompanyContext } from "@/contexts/CompanyContext";
-import { Loader2, Building2 } from "lucide-react";
+import { Loader2, Building2, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +32,25 @@ export default function CompanySlugWrapper() {
             <h2 className="text-xl font-semibold">Empresa não encontrada</h2>
             <p className="text-muted-foreground">
               Não encontramos nenhuma empresa com o identificador "<strong>{slug}</strong>".
+            </p>
+            <a href="/">
+              <Button variant="outline" className="mt-2">Voltar ao início</Button>
+            </a>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (company.status === "pending") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md shadow-lg border-amber-500/30">
+          <CardContent className="pt-6 text-center space-y-4">
+            <Clock className="h-12 w-12 text-amber-500 mx-auto" />
+            <h2 className="text-xl font-semibold">Empresa em Análise</h2>
+            <p className="text-muted-foreground">
+              Esta empresa está aguardando aprovação do administrador. Você será notificado quando for aprovada.
             </p>
             <a href="/">
               <Button variant="outline" className="mt-2">Voltar ao início</Button>

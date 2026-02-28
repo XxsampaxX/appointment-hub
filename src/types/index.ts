@@ -13,7 +13,7 @@ export interface Company {
   phone: string;
   address: string;
   document: string;
-  status: "active" | "suspended";
+  status: "active" | "suspended" | "pending";
   workingHoursStart: string;
   workingHoursEnd: string;
   slotDuration: number;
