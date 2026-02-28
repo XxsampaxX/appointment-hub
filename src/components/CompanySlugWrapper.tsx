@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams, Outlet } from "react-router-dom";
 import { useCompanyContext } from "@/contexts/CompanyContext";
-import { Loader2, Building2 } from "lucide-react";
+import { Loader2, Building2, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
