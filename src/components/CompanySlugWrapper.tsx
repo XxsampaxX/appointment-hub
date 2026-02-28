@@ -54,9 +54,10 @@ export default function CompanySlugWrapper() {
             <p className="text-muted-foreground">
               Esta empresa está aguardando aprovação do administrador. Você será notificado quando for aprovada.
             </p>
-            <a href="/">
-              <Button variant="outline" className="mt-2">Voltar ao início</Button>
-            </a>
+            <div className="flex gap-2 justify-center mt-2">
+              <a href="/"><Button variant="outline">Voltar ao início</Button></a>
+              {isAuthenticated && <Button variant="ghost" onClick={logout} className="gap-2"><LogOut className="h-4 w-4" />Sair</Button>}
+            </div>
           </CardContent>
         </Card>
       </div>
