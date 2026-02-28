@@ -141,6 +141,34 @@ export default function MasterAdminPage() {
     fetchData();
   };
 
+  const approveCompany = async (company: CompanyWithSub) => {
+    const { error } = await supabase
+      .from("companies")
+      .update({ status: "active" })
+      .eq("id", company.id);
+
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Empresa aprovada com sucesso!" });
+    fetchData();
+  };
+
+  const rejectCompany = async (company: CompanyWithSub) => {
+    // Delete subscription, members, then company
+    await supabase.from("subscriptions").delete().eq("company_id", company.id);
+    await supabase.from("company_members").delete().eq("company_id", company.id);
+    const { error } = await supabase.from("companies").delete().eq("id", company.id);
+
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Empresa reprovada e removida" });
+    fetchData();
+  };
+
   const changePlan = async (companyId: string, newPlan: string) => {
     const limits: Record<string, number | null> = {
       free: 50,
