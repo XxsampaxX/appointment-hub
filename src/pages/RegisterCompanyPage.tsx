@@ -10,14 +10,40 @@ import { useToast } from "@/hooks/use-toast";
 import AgendyaLogo from "@/components/AgendyaLogo";
 import { ArrowLeft, Building2, Clock, Loader2, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 
+function maskCpf(value: string) {
+  return value.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2").slice(0, 14);
+}
+
+function maskPhone(value: string) {
+  return value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 15);
+}
+
 export default function RegisterCompanyPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser, isAuthenticated, loading: authLoading } = useAuthContext();
+  const { currentUser, isAuthenticated, loading: authLoading, register, login } = useAuthContext();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [document, setDocument] = useState("");
+
+  // Registration form state
+  const [showRegister, setShowRegister] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regCpf, setRegCpf] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirmPassword, setRegConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [regSubmitting, setRegSubmitting] = useState(false);
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginSubmitting, setLoginSubmitting] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   if (authLoading) {
     return (
