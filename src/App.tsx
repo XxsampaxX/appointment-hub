@@ -24,6 +24,7 @@ import MasterAdminPage from "./pages/MasterAdminPage";
 import CreateCompanyPage from "./pages/CreateCompanyPage";
 import RegisterCompanyPage from "./pages/RegisterCompanyPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import PlansPage from "./pages/PlansPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
 import { Loader2 } from "lucide-react";
 
