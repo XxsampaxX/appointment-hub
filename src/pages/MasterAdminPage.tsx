@@ -310,6 +310,40 @@ export default function MasterAdminPage() {
           })}
         </div>
 
+        {/* Pending Companies */}
+        {companies.filter((c) => c.status === "pending").length > 0 && (
+          <Card className="border-amber-500/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-amber-500" />
+                Empresas Aguardando Aprovação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {companies.filter((c) => c.status === "pending").map((c) => (
+                  <div key={c.id} className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                    <div>
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-sm text-muted-foreground">Slug: {c.slug} • {new Date(c.created_at).toLocaleDateString("pt-BR")}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => approveCompany(c)} className="gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Aprovar
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => rejectCompany(c)} className="gap-1">
+                        <Ban className="h-3.5 w-3.5" />
+                        Reprovar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Companies Table */}
         <Card>
           <CardHeader>
