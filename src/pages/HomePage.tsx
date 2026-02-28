@@ -116,6 +116,13 @@ export default function HomePage() {
                 <span className="sm:hidden">Cadastrar</span>
               </Button>
             </Link>
+            <Link to="/planos">
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3 gap-1.5">
+                <Zap className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Ver Planos</span>
+                <span className="sm:hidden">Planos</span>
+              </Button>
+            </Link>
             <Link to="/login">
               <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">Acessar Painel</Button>
             </Link>

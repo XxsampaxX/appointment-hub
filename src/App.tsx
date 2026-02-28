@@ -24,6 +24,7 @@ import MasterAdminPage from "./pages/MasterAdminPage";
 import CreateCompanyPage from "./pages/CreateCompanyPage";
 import RegisterCompanyPage from "./pages/RegisterCompanyPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import PlansPage from "./pages/PlansPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
 import { Loader2 } from "lucide-react";
 
@@ -83,6 +84,7 @@ const App = () => (
               <Route path="/login" element={<GlobalLoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/cadastrar-empresa" element={<RegisterCompanyPage />} />
+              <Route path="/planos" element={<PlansPage />} />
               <Route path="/admin-master" element={<MasterRoute><MasterAdminPage /></MasterRoute>} />
               <Route path="/admin-master/nova-empresa" element={<MasterRoute><CreateCompanyPage /></MasterRoute>} />
 
