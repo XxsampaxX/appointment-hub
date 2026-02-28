@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import AgendyaLogo from "@/components/AgendyaLogo";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Building2,
   CalendarDays,
   Clock,
   Users,
