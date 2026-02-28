@@ -386,8 +386,8 @@ export default function MasterAdminPage() {
                         </Select>
                       </td>
                       <td className="p-3">
-                        <Badge variant={c.status === "active" ? "default" : "destructive"}>
-                          {c.status === "active" ? "Ativa" : "Suspensa"}
+                        <Badge variant={c.status === "active" ? "default" : c.status === "pending" ? "outline" : "destructive"}>
+                          {c.status === "active" ? "Ativa" : c.status === "pending" ? "Pendente" : "Suspensa"}
                         </Badge>
                       </td>
                       <td className="p-3">{c.clientCount}</td>
