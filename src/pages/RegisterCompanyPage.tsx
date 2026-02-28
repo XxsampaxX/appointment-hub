@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import AgendyaLogo from "@/components/AgendyaLogo";
-import { ArrowLeft, Building2, Clock, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Building2, Clock, Loader2, CheckCircle2, Eye, EyeOff, UserPlus } from "lucide-react";
 
 export default function RegisterCompanyPage() {
   const navigate = useNavigate();
