@@ -82,6 +82,7 @@ const App = () => (
               <Route path="/empresas" element={<CompanySelectPage />} />
               <Route path="/login" element={<GlobalLoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/cadastrar-empresa" element={<RegisterCompanyPage />} />
               <Route path="/admin-master" element={<MasterRoute><MasterAdminPage /></MasterRoute>} />
               <Route path="/admin-master/nova-empresa" element={<MasterRoute><CreateCompanyPage /></MasterRoute>} />
 
