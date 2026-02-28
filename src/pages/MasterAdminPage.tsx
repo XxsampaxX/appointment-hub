@@ -234,7 +234,7 @@ export default function MasterAdminPage() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <Building2 className="h-8 w-8 text-primary" />
@@ -250,6 +250,15 @@ export default function MasterAdminPage() {
               <div>
                 <p className="text-2xl font-bold">{globalStats.activeCompanies}</p>
                 <p className="text-xs text-muted-foreground">Ativas</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={globalStats.pendingCompanies > 0 ? "border-amber-500/50 bg-amber-500/5" : ""}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <Clock className={`h-8 w-8 ${globalStats.pendingCompanies > 0 ? "text-amber-500" : "text-muted-foreground"}`} />
+              <div>
+                <p className="text-2xl font-bold">{globalStats.pendingCompanies}</p>
+                <p className="text-xs text-muted-foreground">Pendentes</p>
               </div>
             </CardContent>
           </Card>
