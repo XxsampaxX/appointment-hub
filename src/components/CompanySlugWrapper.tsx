@@ -42,6 +42,25 @@ export default function CompanySlugWrapper() {
     );
   }
 
+  if (company.status === "pending") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md shadow-lg border-amber-500/30">
+          <CardContent className="pt-6 text-center space-y-4">
+            <Clock className="h-12 w-12 text-amber-500 mx-auto" />
+            <h2 className="text-xl font-semibold">Empresa em Análise</h2>
+            <p className="text-muted-foreground">
+              Esta empresa está aguardando aprovação do administrador. Você será notificado quando for aprovada.
+            </p>
+            <a href="/">
+              <Button variant="outline" className="mt-2">Voltar ao início</Button>
+            </a>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (company.status === "suspended") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
