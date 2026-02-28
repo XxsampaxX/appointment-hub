@@ -114,6 +114,7 @@ export default function MasterAdminPage() {
       totalCompanies: companiesData.length,
       activeCompanies: companiesData.filter((c) => c.status === "active").length,
       suspendedCompanies: companiesData.filter((c) => c.status === "suspended").length,
+      pendingCompanies: companiesData.filter((c) => c.status === "pending").length,
       totalAppointments: appointmentsData.length,
       totalUsers: membersData.length,
     });
