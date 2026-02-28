@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 export default function CompanySlugWrapper() {
   const { slug } = useParams<{ slug: string }>();
   const { company, loading, setSlug, slug: contextSlug } = useCompanyContext();
+  const { isAuthenticated, logout } = useAuthContext();
 
   useEffect(() => {
     if (slug) {
