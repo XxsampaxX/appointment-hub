@@ -57,6 +57,7 @@ export default function MasterAdminPage() {
     totalCompanies: 0,
     activeCompanies: 0,
     suspendedCompanies: 0,
+    pendingCompanies: 0,
     totalAppointments: 0,
     totalUsers: 0,
   });
