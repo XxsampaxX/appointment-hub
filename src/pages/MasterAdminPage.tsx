@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Ban,
   CheckCircle2,
+  Clock,
 } from "lucide-react";
 
 interface CompanyRow {
