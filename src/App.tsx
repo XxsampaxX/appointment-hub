@@ -22,6 +22,7 @@ import HomePage from "./pages/HomePage";
 import GlobalLoginPage from "./pages/GlobalLoginPage";
 import MasterAdminPage from "./pages/MasterAdminPage";
 import CreateCompanyPage from "./pages/CreateCompanyPage";
+import RegisterCompanyPage from "./pages/RegisterCompanyPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
 import { Loader2 } from "lucide-react";
