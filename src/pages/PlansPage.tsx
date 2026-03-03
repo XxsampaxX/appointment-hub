@@ -163,11 +163,10 @@ export default function PlansPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-border/50 bg-muted/30">
         <div className="container px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link to="/">
-            <AgendyaLogo size="sm" />
+            <span className="font-bold text-lg">Agendya</span>
           </Link>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Agendya. Todos os direitos reservados.
