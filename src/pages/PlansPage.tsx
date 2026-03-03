@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import AgendyaLogo from "@/components/AgendyaLogo";
+import LandingHeader from "@/components/landing/LandingHeader";
 import { CheckCircle2, X, ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 
 const WHATSAPP_URL =
@@ -57,25 +57,7 @@ const plans = [
 export default function PlansPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
-        <div className="container flex items-center justify-between h-14 sm:h-16 px-4">
-          <Link to="/">
-            <AgendyaLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link to="/login">
-              <Button variant="outline" size="sm" className="text-xs sm:text-sm">Acessar Painel</Button>
-            </Link>
-            <Link to="/cadastrar-empresa">
-              <Button size="sm" className="text-xs sm:text-sm gap-1.5">
-                <ArrowRight className="h-3.5 w-3.5" />
-                Cadastrar Empresa
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -181,11 +163,10 @@ export default function PlansPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-border/50 bg-muted/30">
         <div className="container px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link to="/">
-            <AgendyaLogo size="sm" />
+            <span className="font-bold text-lg">Agendya</span>
           </Link>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Agendya. Todos os direitos reservados.
