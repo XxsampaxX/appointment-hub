@@ -123,10 +123,10 @@ export default function WhatsAppSettingsPage() {
       toast({ title: "Meta App ID não configurado", variant: "destructive" });
       return;
     }
-    const redirectUri = encodeURIComponent(window.location.origin + `/${company?.slug}/whatsapp`);
-    const configId = ""; // Will use Embedded Signup
+    const redirectUri = encodeURIComponent("https://www.agendya.com.br/oauth/meta/callback");
+    const state = encodeURIComponent(company?.id || "");
     const scope = "whatsapp_business_management,whatsapp_business_messaging";
-    const url = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${META_APP_ID}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&extras={"setup":{"channel":"WHATSAPP_BUSINESS_MESSAGING"},"business":{"verification":{"code":""}}}`;
+    const url = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${META_APP_ID}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&state=${state}&extras={"setup":{"channel":"WHATSAPP_BUSINESS_MESSAGING"},"business":{"verification":{"code":""}}}`;
     window.location.href = url;
   }
 

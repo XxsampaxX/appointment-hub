@@ -25,6 +25,7 @@ import CreateCompanyPage from "./pages/CreateCompanyPage";
 import RegisterCompanyPage from "./pages/RegisterCompanyPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PlansPage from "./pages/PlansPage";
+import MetaOAuthCallbackPage from "./pages/MetaOAuthCallbackPage";
 import WhatsAppSettingsPage from "./pages/WhatsAppSettingsPage";
 import WhatsAppChatPage from "./pages/WhatsAppChatPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
@@ -87,6 +88,7 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/cadastrar-empresa" element={<RegisterCompanyPage />} />
               <Route path="/planos" element={<PlansPage />} />
+              <Route path="/oauth/meta/callback" element={<MetaOAuthCallbackPage />} />
               <Route path="/admin-master" element={<MasterRoute><MasterAdminPage /></MasterRoute>} />
               <Route path="/admin-master/nova-empresa" element={<MasterRoute><CreateCompanyPage /></MasterRoute>} />
 
