@@ -25,6 +25,8 @@ import CreateCompanyPage from "./pages/CreateCompanyPage";
 import RegisterCompanyPage from "./pages/RegisterCompanyPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import PlansPage from "./pages/PlansPage";
+import WhatsAppSettingsPage from "./pages/WhatsAppSettingsPage";
+import WhatsAppChatPage from "./pages/WhatsAppChatPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
 import { Loader2 } from "lucide-react";
 
@@ -102,6 +104,8 @@ const App = () => (
                 <Route path="clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
                 <Route path="agenda" element={<StaffRoute><AgendaPage /></StaffRoute>} />
                 <Route path="horarios" element={<AdminRoute><ScheduleSettingsPage /></AdminRoute>} />
+                <Route path="whatsapp" element={<AdminRoute><WhatsAppSettingsPage /></AdminRoute>} />
+                <Route path="atendimento" element={<StaffRoute><WhatsAppChatPage /></StaffRoute>} />
 
                 {/* User routes */}
                 <Route path="meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
