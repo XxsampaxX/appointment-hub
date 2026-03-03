@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Smartphone, Unplug, MessageSquare, Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 
-const META_APP_ID = import.meta.env.VITE_META_APP_ID || "";
+const META_APP_ID = "26573164005613929";
 
 interface WhatsAppConfig {
   company_id: string;
