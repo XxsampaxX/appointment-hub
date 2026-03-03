@@ -289,6 +289,101 @@ export type Database = {
           },
         ]
       }
+      company_whatsapp: {
+        Row: {
+          access_token_encrypted: string | null
+          company_id: string
+          created_at: string
+          display_phone: string | null
+          meta_business_id: string | null
+          phone_number_id: string | null
+          status: string
+          token_expires_at: string | null
+          updated_at: string
+          waba_id: string | null
+        }
+        Insert: {
+          access_token_encrypted?: string | null
+          company_id: string
+          created_at?: string
+          display_phone?: string | null
+          meta_business_id?: string | null
+          phone_number_id?: string | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          waba_id?: string | null
+        }
+        Update: {
+          access_token_encrypted?: string | null
+          company_id?: string
+          created_at?: string
+          display_phone?: string | null
+          meta_business_id?: string | null
+          phone_number_id?: string | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          waba_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_whatsapp_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          client_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          phone_number: string
+          status: string
+          unread_count: number
+        }
+        Insert: {
+          client_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          phone_number: string
+          status?: string
+          unread_count?: number
+        }
+        Update: {
+          client_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          phone_number?: string
+          status?: string
+          unread_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_roles: {
         Row: {
           created_at: string
@@ -309,6 +404,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          company_id: string
+          content: string
+          conversation_id: string
+          created_at: string
+          direction: string
+          id: string
+          message_type: string
+          meta_message_id: string | null
+          status: string
+        }
+        Insert: {
+          company_id: string
+          content?: string
+          conversation_id: string
+          created_at?: string
+          direction: string
+          id?: string
+          message_type?: string
+          meta_message_id?: string | null
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          message_type?: string
+          meta_message_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professionals: {
         Row: {
@@ -456,6 +602,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_auto_replies: {
+        Row: {
+          after_hours_message: string | null
+          business_hours_end: string | null
+          business_hours_start: string | null
+          company_id: string
+          created_at: string
+          is_after_hours_enabled: boolean
+          is_welcome_enabled: boolean
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          after_hours_message?: string | null
+          business_hours_end?: string | null
+          business_hours_start?: string | null
+          company_id: string
+          created_at?: string
+          is_after_hours_enabled?: boolean
+          is_welcome_enabled?: boolean
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          after_hours_message?: string | null
+          business_hours_end?: string | null
+          business_hours_start?: string | null
+          company_id?: string
+          created_at?: string
+          is_after_hours_enabled?: boolean
+          is_welcome_enabled?: boolean
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_auto_replies_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
             referencedRelation: "companies"
