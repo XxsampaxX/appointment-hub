@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import AgendyaLogo from "@/components/AgendyaLogo";
+import LandingHeader from "@/components/landing/LandingHeader";
 import { CheckCircle2, X, ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 
 const WHATSAPP_URL =
