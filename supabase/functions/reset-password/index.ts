@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.com.br>";
-    const PUBLIC_URL = "https://www.agendya.com.br";
+    const PUBLIC_URL = "https://agendago.lovable.app";
 
     if (!RESEND_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
       console.error("[ResetPassword] Missing required secrets");
