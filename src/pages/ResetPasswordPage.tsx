@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,33 +21,67 @@ export default function ResetPasswordPage() {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Listen for PASSWORD_RECOVERY event
+    let handled = false;
+
+    // Method 1: Check query params for token_hash (direct link from our custom email)
+    const tokenHash = searchParams.get("token_hash");
+    const type = searchParams.get("type");
+
+    if (tokenHash && type === "recovery") {
+      // Verify the token using Supabase's verifyOtp
+      supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: "recovery",
+      }).then(({ data, error: verifyError }) => {
+        if (verifyError) {
+          console.error("[ResetPassword] verifyOtp error:", verifyError.message);
+          setIsRecovery(false);
+          setLoading(false);
+        } else if (data?.session) {
+          console.log("[ResetPassword] Token verified successfully via query params");
+          setIsRecovery(true);
+          setLoading(false);
+          handled = true;
+        } else {
+          setIsRecovery(false);
+          setLoading(false);
+        }
+      });
+      return; // Wait for async verification
+    }
+
+    // Method 2: Listen for PASSWORD_RECOVERY event (legacy flow via Supabase redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+      if (event === "PASSWORD_RECOVERY" && !handled) {
+        handled = true;
         setIsRecovery(true);
         setLoading(false);
       }
     });
 
-    // Also check URL hash for recovery type
+    // Method 3: Check URL hash for recovery type (legacy Supabase redirect with hash)
     const hash = window.location.hash;
     if (hash.includes("type=recovery")) {
       setIsRecovery(true);
       setLoading(false);
+      handled = true;
     }
 
     // Timeout to stop loading if no recovery event
     const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+      if (!handled) {
+        setLoading(false);
+      }
+    }, 5000);
 
     return () => {
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, []);
+  }, [searchParams]);
 
   const passwordValid = password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;

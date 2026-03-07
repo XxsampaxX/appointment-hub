@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build the verification URL
+    // Extract token from action_link and build a direct URL to avoid Supabase redirect issues
     const actionLink = data?.properties?.action_link;
     if (!actionLink) {
       console.error("[ResetPassword] No action_link returned");
@@ -134,22 +134,30 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Fix redirect URL: ensure it always points to the public domain, not Lovable preview
-    let fixedActionLink = actionLink;
+    // Extract the token from the action_link URL
+    // action_link format: https://<project>.supabase.co/auth/v1/verify?token=<TOKEN>&type=recovery&redirect_to=...
+    let resetUrl: string;
     try {
       const linkUrl = new URL(actionLink);
-      const currentRedirect = linkUrl.searchParams.get("redirect_to");
-      if (currentRedirect && (currentRedirect.includes("lovable.app") || currentRedirect.includes("lovableproject.com"))) {
-        linkUrl.searchParams.set("redirect_to", `${PUBLIC_URL}/reset-password`);
-        fixedActionLink = linkUrl.toString();
-        console.log("[ResetPassword] Fixed redirect_to from Lovable URL to public URL");
+      const token = linkUrl.searchParams.get("token");
+      
+      if (token) {
+        // Build direct URL to our app, bypassing Supabase's /verify redirect
+        // This avoids the redirect_to allowlist issue
+        resetUrl = `${PUBLIC_URL}/reset-password?token_hash=${encodeURIComponent(token)}&type=recovery`;
+        console.log("[ResetPassword] Built direct reset URL (bypassing Supabase redirect)");
+      } else {
+        // Fallback: use the action_link as-is
+        console.warn("[ResetPassword] Could not extract token from action_link, using original");
+        resetUrl = actionLink;
       }
     } catch (urlErr) {
       console.error("[ResetPassword] Error parsing action_link URL:", urlErr);
+      resetUrl = actionLink;
     }
 
     // Send the email via Resend
-    const html = buildResetHtml({ resetUrl: fixedActionLink });
+    const html = buildResetHtml({ resetUrl });
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
