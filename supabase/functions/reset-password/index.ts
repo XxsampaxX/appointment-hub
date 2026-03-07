@@ -134,8 +134,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Fix redirect URL: ensure it always points to the public domain, not Lovable preview
+    let fixedActionLink = actionLink;
+    try {
+      const linkUrl = new URL(actionLink);
+      const currentRedirect = linkUrl.searchParams.get("redirect_to");
+      if (currentRedirect && (currentRedirect.includes("lovable.app") || currentRedirect.includes("lovableproject.com"))) {
+        linkUrl.searchParams.set("redirect_to", `${PUBLIC_URL}/reset-password`);
+        fixedActionLink = linkUrl.toString();
+        console.log("[ResetPassword] Fixed redirect_to from Lovable URL to public URL");
+      }
+    } catch (urlErr) {
+      console.error("[ResetPassword] Error parsing action_link URL:", urlErr);
+    }
+
     // Send the email via Resend
-    const html = buildResetHtml({ resetUrl: actionLink });
+    const html = buildResetHtml({ resetUrl: fixedActionLink });
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
