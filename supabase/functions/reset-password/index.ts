@@ -73,6 +73,27 @@ function buildResetHtml(params: { resetUrl: string }): string {
   `.trim();
 }
 
+function buildResetUrl(params: { publicUrl: string; actionLink: string; hashedToken?: string | null }): string {
+  const { publicUrl, actionLink, hashedToken } = params;
+
+  if (hashedToken) {
+    return `${publicUrl}/reset-password?token_hash=${encodeURIComponent(hashedToken)}&type=recovery`;
+  }
+
+  try {
+    const linkUrl = new URL(actionLink);
+    const tokenHash = linkUrl.searchParams.get("token_hash") ?? linkUrl.searchParams.get("token");
+
+    if (!tokenHash) {
+      return `${publicUrl}/reset-password`;
+    }
+
+    return `${publicUrl}/reset-password?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`;
+  } catch (_) {
+    return `${publicUrl}/reset-password`;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -124,8 +145,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract token from action_link and build a direct URL to avoid Supabase redirect issues
+    // Build URL with hashed token to avoid auth redirect allowlist issues
     const actionLink = data?.properties?.action_link;
+    const hashedToken = data?.properties?.hashed_token;
+
     if (!actionLink) {
       console.error("[ResetPassword] No action_link returned");
       return new Response(
@@ -134,27 +157,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract the token from the action_link URL
-    // action_link format: https://<project>.supabase.co/auth/v1/verify?token=<TOKEN>&type=recovery&redirect_to=...
-    let resetUrl: string;
-    try {
-      const linkUrl = new URL(actionLink);
-      const token = linkUrl.searchParams.get("token");
-      
-      if (token) {
-        // Build direct URL to our app, bypassing Supabase's /verify redirect
-        // This avoids the redirect_to allowlist issue
-        resetUrl = `${PUBLIC_URL}/reset-password?token_hash=${encodeURIComponent(token)}&type=recovery`;
-        console.log("[ResetPassword] Built direct reset URL (bypassing Supabase redirect)");
-      } else {
-        // Fallback: use the action_link as-is
-        console.warn("[ResetPassword] Could not extract token from action_link, using original");
-        resetUrl = actionLink;
-      }
-    } catch (urlErr) {
-      console.error("[ResetPassword] Error parsing action_link URL:", urlErr);
-      resetUrl = actionLink;
-    }
+    const resetUrl = buildResetUrl({ publicUrl: PUBLIC_URL, actionLink, hashedToken });
 
     // Send the email via Resend
     const html = buildResetHtml({ resetUrl });
@@ -192,7 +195,7 @@ Deno.serve(async (req) => {
   } catch (err) {
     console.error("[ResetPassword] Unexpected error:", err);
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: "Erro interno do servidor" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
