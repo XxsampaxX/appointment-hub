@@ -98,6 +98,9 @@ Deno.serve(async (req) => {
     }
 
     // 5. Create company with status "pending"
+    const validBusinessTypes = ["clinic", "nail_designer", "beauty", "therapy", "service"];
+    const finalBusinessType = validBusinessTypes.includes(businessType) ? businessType : "service";
+
     const { data: companyData, error: companyError } = await adminClient
       .from("companies")
       .insert({
@@ -106,6 +109,7 @@ Deno.serve(async (req) => {
         document: (document || "").trim(),
         status: "pending",
         created_by: user.id,
+        business_type: finalBusinessType,
       })
       .select("id")
       .single();
