@@ -191,6 +191,7 @@ export type Database = {
       companies: {
         Row: {
           address: string | null
+          business_type: string | null
           created_at: string
           created_by: string | null
           document: string | null
@@ -213,6 +214,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          business_type?: string | null
           created_at?: string
           created_by?: string | null
           document?: string | null
@@ -235,6 +237,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          business_type?: string | null
           created_at?: string
           created_by?: string | null
           document?: string | null
