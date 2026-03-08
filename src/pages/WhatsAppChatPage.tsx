@@ -208,7 +208,7 @@ export default function WhatsAppChatPage() {
   if (!company) return null;
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-4">
         <div>
           <h1 className="font-heading text-2xl font-bold">Atendimento WhatsApp</h1>
