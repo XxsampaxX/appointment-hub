@@ -249,7 +249,7 @@ Deno.serve(async (req) => {
   // ─── Diagnostic endpoint: GET /send-email/teste ───────────────────────────
   if (req.method === "GET" && url.pathname.endsWith("/teste")) {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.com.br>";
+    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.app>";
     const TEST_TO = Deno.env.get("EMAIL_TEST_TO") ?? "felipe18935@gmail.com";
 
     const apiKeyLoaded = !!RESEND_API_KEY;
