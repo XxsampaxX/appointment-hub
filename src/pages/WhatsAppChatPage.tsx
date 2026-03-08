@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";

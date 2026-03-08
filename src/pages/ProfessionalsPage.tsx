@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useProfessionals } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Professional } from "@/types";

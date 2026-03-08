@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { useBlockedSlots } from "@/hooks/useBlockedSlots";
 import { supabase } from "@/integrations/supabase/client";
