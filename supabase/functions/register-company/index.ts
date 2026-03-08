@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     // 2. Parse body
     const body = await req.json();
-    const { companyName, document } = body;
+    const { companyName, document, businessType } = body;
 
     if (!companyName?.trim()) {
       return new Response(JSON.stringify({ error: "Nome da empresa é obrigatório" }), {
