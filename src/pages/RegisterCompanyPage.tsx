@@ -229,6 +229,18 @@ export default function RegisterCompanyPage() {
     );
   }
 
+  if (showBusinessType && createdCompanyId) {
+    return (
+      <BusinessTypePage
+        companyId={createdCompanyId}
+        onComplete={() => {
+          setShowBusinessType(false);
+          setSuccess(true);
+        }}
+      />
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
