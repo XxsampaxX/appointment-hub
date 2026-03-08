@@ -1,0 +1,1 @@
+ALTER TABLE public.companies ADD COLUMN business_type text DEFAULT NULL;

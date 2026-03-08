@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import BusinessTypePage from "@/pages/BusinessTypePage";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export default function RegisterCompanyPage() {
   const { currentUser, isAuthenticated, loading: authLoading, register, login } = useAuthContext();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [createdCompanyId, setCreatedCompanyId] = useState<string | null>(null);
+  const [showBusinessType, setShowBusinessType] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [document, setDocument] = useState("");
 
@@ -226,6 +229,18 @@ export default function RegisterCompanyPage() {
     );
   }
 
+  if (showBusinessType && createdCompanyId) {
+    return (
+      <BusinessTypePage
+        companyId={createdCompanyId}
+        onComplete={() => {
+          setShowBusinessType(false);
+          setSuccess(true);
+        }}
+      />
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -289,7 +304,8 @@ export default function RegisterCompanyPage() {
       return;
     }
 
-    setSuccess(true);
+    setCreatedCompanyId(data?.company?.id || null);
+    setShowBusinessType(true);
   };
 
   return (
