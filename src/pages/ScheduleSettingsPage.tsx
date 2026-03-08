@@ -126,7 +126,7 @@ export default function ScheduleSettingsPage() {
   if (!company) return null;
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Configuração de Horários</h1>
