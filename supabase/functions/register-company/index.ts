@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     // 2. Parse body
     const body = await req.json();
-    const { companyName, document } = body;
+    const { companyName, document, businessType } = body;
 
     if (!companyName?.trim()) {
       return new Response(JSON.stringify({ error: "Nome da empresa é obrigatório" }), {
@@ -98,6 +98,9 @@ Deno.serve(async (req) => {
     }
 
     // 5. Create company with status "pending"
+    const validBusinessTypes = ["clinic", "nail_designer", "beauty", "therapy", "service"];
+    const finalBusinessType = validBusinessTypes.includes(businessType) ? businessType : "service";
+
     const { data: companyData, error: companyError } = await adminClient
       .from("companies")
       .insert({
@@ -106,6 +109,7 @@ Deno.serve(async (req) => {
         document: (document || "").trim(),
         status: "pending",
         created_by: user.id,
+        business_type: finalBusinessType,
       })
       .select("id")
       .single();

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import BusinessTypePage from "@/pages/BusinessTypePage";
+import BusinessTypePage, { type BusinessTypeValue } from "@/pages/BusinessTypePage";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,14 +19,15 @@ function maskPhone(value: string) {
   return value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 15);
 }
 
+type OnboardingStep = "auth" | "business-type" | "company-data" | "success";
+
 export default function RegisterCompanyPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentUser, isAuthenticated, loading: authLoading, register, login } = useAuthContext();
+  const [step, setStep] = useState<OnboardingStep>("auth");
+  const [businessType, setBusinessType] = useState<BusinessTypeValue | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [createdCompanyId, setCreatedCompanyId] = useState<string | null>(null);
-  const [showBusinessType, setShowBusinessType] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [document, setDocument] = useState("");
 
@@ -48,6 +49,9 @@ export default function RegisterCompanyPage() {
   const [loginSubmitting, setLoginSubmitting] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
+  // Auto-advance to business-type step when user authenticates
+  const currentStep = !isAuthenticated && !authLoading ? "auth" : step === "auth" ? "business-type" : step;
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -56,7 +60,8 @@ export default function RegisterCompanyPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  // Step 1: Auth
+  if (currentStep === "auth") {
     const handleRegister = async (e: React.FormEvent) => {
       e.preventDefault();
       if (regPassword !== regConfirmPassword) {
@@ -69,7 +74,7 @@ export default function RegisterCompanyPage() {
       if (!result.success) {
         toast({ title: "Erro ao criar conta", description: result.message, variant: "destructive" });
       } else {
-        toast({ title: "Conta criada!", description: "Agora preencha os dados da empresa." });
+        toast({ title: "Conta criada!", description: "Agora vamos configurar seu negócio." });
       }
     };
 
@@ -229,19 +234,20 @@ export default function RegisterCompanyPage() {
     );
   }
 
-  if (showBusinessType && createdCompanyId) {
+  // Step 2: Business Type Selection
+  if (currentStep === "business-type") {
     return (
       <BusinessTypePage
-        companyId={createdCompanyId}
-        onComplete={() => {
-          setShowBusinessType(false);
-          setSuccess(true);
+        onSelect={(type) => {
+          setBusinessType(type);
+          setStep("company-data");
         }}
       />
     );
   }
 
-  if (success) {
+  // Step 4: Success
+  if (currentStep === "success") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -263,6 +269,7 @@ export default function RegisterCompanyPage() {
     );
   }
 
+  // Step 3: Company Data
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -277,6 +284,7 @@ export default function RegisterCompanyPage() {
       body: {
         companyName: companyName.trim(),
         document: document.trim(),
+        businessType: businessType,
       },
     });
 
@@ -304,8 +312,7 @@ export default function RegisterCompanyPage() {
       return;
     }
 
-    setCreatedCompanyId(data?.company?.id || null);
-    setShowBusinessType(true);
+    setStep("success");
   };
 
   return (
@@ -313,7 +320,7 @@ export default function RegisterCompanyPage() {
       <header className="sticky top-0 z-50 border-b bg-card">
         <div className="container flex items-center justify-between h-16 px-4">
           <AgendyaLogo size="md" />
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => setStep("business-type")} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Button>
@@ -371,7 +378,7 @@ export default function RegisterCompanyPage() {
                   </p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Clock className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                  <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                   <p className="text-sm text-muted-foreground">Aprovação necessária antes de ativar</p>
                 </div>
               </div>

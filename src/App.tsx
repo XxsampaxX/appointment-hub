@@ -87,6 +87,7 @@ const App = () => (
               <Route path="/login" element={<GlobalLoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/cadastrar-empresa" element={<RegisterCompanyPage />} />
+              <Route path="/onboarding/business-type" element={<RegisterCompanyPage />} />
               <Route path="/planos" element={<PlansPage />} />
               <Route path="/oauth/meta/callback" element={<MetaOAuthCallbackPage />} />
               <Route path="/admin-master" element={<MasterRoute><MasterAdminPage /></MasterRoute>} />
