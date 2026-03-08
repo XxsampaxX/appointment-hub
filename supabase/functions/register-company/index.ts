@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
                 Authorization: `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: "Agendya <confirmacao@agendya.com.br>",
+                from: "Agendya <confirmacao@agendya.app>",
                 to: emails,
                 subject: `Nova empresa aguardando aprovação: ${companyName.trim()}`,
                 html: `
