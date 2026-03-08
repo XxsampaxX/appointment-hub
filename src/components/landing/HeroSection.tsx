@@ -68,7 +68,7 @@ export default function HeroSection() {
                   <span className="w-3 h-3 rounded-full bg-warning/60" />
                   <span className="w-3 h-3 rounded-full bg-success/60" />
                 </div>
-                <span className="text-xs text-muted-foreground ml-2">app.agendya.com.br</span>
+                <span className="text-xs text-muted-foreground ml-2"><span className="text-xs text-muted-foreground ml-2">app.agendya.app</span></span>
               </div>
               {/* Mock content */}
               <div className="p-6 space-y-4">

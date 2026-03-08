@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
                 Authorization: `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: "Agendya <confirmacao@agendya.com.br>",
+                from: "Agendya <confirmacao@agendya.app>",
                 to: emails,
                 subject: `Nova empresa aguardando aprovação: ${companyName.trim()}`,
                 html: `
@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
                     <p>A empresa <strong>${companyName.trim()}</strong> foi cadastrada e aguarda sua aprovação.</p>
                     <p><strong>Dono:</strong> ${user.email}</p>
                     <p><strong>Slug:</strong> ${slug}</p>
-                    <a href="https://agendya.com.br/admin-master" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:white;border-radius:8px;text-decoration:none;margin-top:12px;">Revisar no Painel</a>
+                    <a href="https://agendya.app/admin-master" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:white;border-radius:8px;text-decoration:none;margin-top:12px;">Revisar no Painel</a>
                   </div>
                 `,
               }),

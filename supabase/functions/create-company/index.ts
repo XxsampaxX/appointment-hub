@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
               Authorization: `Bearer ${RESEND_API_KEY}`,
             },
             body: JSON.stringify({
-              from: "Agendya <confirmacao@agendya.com.br>",
+              from: "Agendya <confirmacao@agendya.app>",
               to: [ownerEmail.trim()],
               subject: `Bem-vindo ao Agendya — ${companyName.trim()}`,
               html: `
@@ -233,7 +233,7 @@ Deno.serve(async (req) => {
                     <li><strong>Senha:</strong> ${ownerPassword}</li>
                   </ul>
                   <p>Acesse o sistema pelo link:</p>
-                  <a href="https://agendya.com.br/${slug}" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:white;border-radius:8px;text-decoration:none;">Acessar Agendya</a>
+                  <a href="https://agendya.app/${slug}" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:white;border-radius:8px;text-decoration:none;">Acessar Agendya</a>
                   <p style="margin-top:16px;color:#888;font-size:12px;">Recomendamos alterar sua senha no primeiro acesso.</p>
                 </div>
               `,

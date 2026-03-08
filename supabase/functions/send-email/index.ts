@@ -76,7 +76,7 @@ function buildHtmlTemplate(params: {
               <table cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center">
-                    <a href="https://agendya.com.br" style="display:inline-block;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;">
+                    <a href="https://agendya.app" style="display:inline-block;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;">
                       Acessar Agendya
                     </a>
                   </td>
@@ -153,7 +153,7 @@ function buildOwnerHtmlTemplate(params: {
               <table cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center">
-                    <a href="https://agendya.com.br" style="display:inline-block;background:linear-gradient(135deg,#059669 0%,#10b981 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;">
+                    <a href="https://agendya.app" style="display:inline-block;background:linear-gradient(135deg,#059669 0%,#10b981 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;">
                       Ver na Agendya
                     </a>
                   </td>
@@ -249,7 +249,7 @@ Deno.serve(async (req) => {
   // ─── Diagnostic endpoint: GET /send-email/teste ───────────────────────────
   if (req.method === "GET" && url.pathname.endsWith("/teste")) {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.com.br>";
+    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.app>";
     const TEST_TO = Deno.env.get("EMAIL_TEST_TO") ?? "felipe18935@gmail.com";
 
     const apiKeyLoaded = !!RESEND_API_KEY;
@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
   // ─── Main send endpoint: POST /send-email ─────────────────────────────────
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.com.br>";
+    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.app>";
 
     console.log(`[Email] RESEND_API_KEY loaded: ${!!RESEND_API_KEY}`);
     console.log(`[Email] FROM_ADDRESS: ${FROM_ADDRESS}`);
