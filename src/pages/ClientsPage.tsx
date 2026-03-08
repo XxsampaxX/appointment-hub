@@ -118,6 +118,6 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

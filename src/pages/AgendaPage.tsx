@@ -398,6 +398,6 @@ export default function AgendaPage() {
           </>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

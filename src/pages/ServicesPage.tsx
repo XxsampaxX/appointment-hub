@@ -126,6 +126,6 @@ export default function ServicesPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }
