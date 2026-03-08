@@ -29,6 +29,7 @@ interface CompanyRow {
   status: string;
   document: string;
   created_at: string;
+  business_type: string | null;
 }
 
 interface SubscriptionRow {
