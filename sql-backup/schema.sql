@@ -40,6 +40,7 @@ CREATE TABLE public.companies (
   address TEXT DEFAULT '',
   document TEXT DEFAULT '',
   status TEXT NOT NULL DEFAULT 'active',
+  business_type TEXT,
   working_hours_start TIME DEFAULT '09:00',
   working_hours_end TIME DEFAULT '18:00',
   slot_duration INTEGER DEFAULT 30,
