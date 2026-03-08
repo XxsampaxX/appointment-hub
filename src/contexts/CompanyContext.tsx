@@ -30,6 +30,7 @@ function mapCompany(row: any): Company {
     workingDays: Array.isArray(row.working_days) ? row.working_days : [1, 2, 3, 4, 5],
     subscriptionStatus: row.subscription_status || "free",
     maxAppointmentsMonth: row.max_appointments_month || undefined,
+    businessType: row.business_type || undefined,
   };
 }
 

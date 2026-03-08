@@ -5,6 +5,8 @@ export type AppointmentStatus = "agendado" | "confirmado" | "concluido" | "cance
 export type PaymentMethod = "pix" | "dinheiro" | "credito" | "debito";
 export type SubscriptionStatus = "free" | "pro" | "premium";
 
+export type BusinessType = "beleza" | "saude" | "fitness" | "educacao" | "servicos" | "outros";
+
 export interface Company {
   id: string;
   name: string;
@@ -21,6 +23,7 @@ export interface Company {
   workingDays: number[];
   subscriptionStatus: SubscriptionStatus;
   maxAppointmentsMonth?: number;
+  businessType?: BusinessType;
 }
 
 export interface CompanyMember {
