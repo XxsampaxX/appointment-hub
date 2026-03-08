@@ -372,8 +372,9 @@ export default function MasterAdminPage() {
                 <tbody>
                   {companies.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-muted/50">
-                      <td className="p-3 font-medium">{c.name}</td>
-                      <td className="p-3 text-muted-foreground">{c.slug}</td>
+                       <td className="p-3 font-medium">{c.name}</td>
+                       <td className="p-3 text-muted-foreground text-xs">{getBusinessTypeLabel((c as any).business_type)}</td>
+                       <td className="p-3 text-muted-foreground">{c.slug}</td>
                       <td className="p-3">
                         <Select
                           value={c.subscription?.plan || "free"}
