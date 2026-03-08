@@ -28,6 +28,12 @@ import PlansPage from "./pages/PlansPage";
 import MetaOAuthCallbackPage from "./pages/MetaOAuthCallbackPage";
 import WhatsAppSettingsPage from "./pages/WhatsAppSettingsPage";
 import WhatsAppChatPage from "./pages/WhatsAppChatPage";
+import FinanceiroPage from "./pages/FinanceiroPage";
+import UsuariosPage from "./pages/UsuariosPage";
+import EstabelecimentosPage from "./pages/EstabelecimentosPage";
+import ConfiguracoesPage from "./pages/ConfiguracoesPage";
+import MeuPerfilPage from "./pages/MeuPerfilPage";
+import ProcedimentosPage from "./pages/ProcedimentosPage";
 import { useMasterAdmin } from "@/hooks/useMasterAdmin";
 import { Loader2 } from "lucide-react";
 
@@ -51,8 +57,18 @@ function StaffRoute({ children }: { children: React.ReactNode }) {
   const { companyRole, loading: companyLoading, company } = useCompanyContext();
   if (loading || companyLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to={`/${company?.slug || ""}`} replace />;
-  // Wait for role to be fully resolved (null means still loading)
   if (companyRole === null) return <LoadingScreen />;
+  if (companyRole === "user") return <Navigate to={`/${company?.slug}/meus-agendamentos`} replace />;
+  return <>{children}</>;
+}
+
+function AgendaRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuthContext();
+  const { companyRole, loading: companyLoading, company } = useCompanyContext();
+  if (loading || companyLoading) return <LoadingScreen />;
+  if (!isAuthenticated) return <Navigate to={`/${company?.slug || ""}`} replace />;
+  if (companyRole === null) return <LoadingScreen />;
+  // admin, profissional, recepcionista can access agenda
   if (companyRole === "user") return <Navigate to={`/${company?.slug}/meus-agendamentos`} replace />;
   return <>{children}</>;
 }
@@ -100,17 +116,27 @@ const App = () => (
                 <Route path="cadastro" element={<CompanyRegisterPage />} />
                 <Route path="agendar" element={<PublicBookingPage />} />
 
-                {/* Staff/Admin routes */}
-                <Route path="admin" element={<StaffRoute><Dashboard /></StaffRoute>} />
+                {/* Admin-only routes */}
+                <Route path="admin" element={<AdminRoute><Dashboard /></AdminRoute>} />
                 <Route path="profissionais" element={<AdminRoute><ProfessionalsPage /></AdminRoute>} />
                 <Route path="servicos" element={<AdminRoute><ServicesPage /></AdminRoute>} />
-                <Route path="clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
-                <Route path="agenda" element={<StaffRoute><AgendaPage /></StaffRoute>} />
+                <Route path="procedimentos" element={<AdminRoute><ProcedimentosPage /></AdminRoute>} />
+                <Route path="financeiro" element={<AdminRoute><FinanceiroPage /></AdminRoute>} />
+                <Route path="usuarios" element={<AdminRoute><UsuariosPage /></AdminRoute>} />
+                <Route path="estabelecimentos" element={<AdminRoute><EstabelecimentosPage /></AdminRoute>} />
+                <Route path="configuracoes" element={<AdminRoute><ConfiguracoesPage /></AdminRoute>} />
                 <Route path="horarios" element={<AdminRoute><ScheduleSettingsPage /></AdminRoute>} />
                 <Route path="whatsapp" element={<AdminRoute><WhatsAppSettingsPage /></AdminRoute>} />
+
+                {/* Staff routes (admin + recepcionista) */}
+                <Route path="clientes" element={<StaffRoute><ClientsPage /></StaffRoute>} />
                 <Route path="atendimento" element={<StaffRoute><WhatsAppChatPage /></StaffRoute>} />
 
-                {/* User routes */}
+                {/* Agenda: admin, profissional, recepcionista */}
+                <Route path="agenda" element={<AgendaRoute><AgendaPage /></AgendaRoute>} />
+
+                {/* Authenticated user routes */}
+                <Route path="meu-perfil" element={<UserRoute><MeuPerfilPage /></UserRoute>} />
                 <Route path="meus-agendamentos" element={<UserRoute><UserBookingPage /></UserRoute>} />
               </Route>
 
