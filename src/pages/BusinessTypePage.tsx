@@ -1,50 +1,25 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import AgendyaLogo from "@/components/AgendyaLogo";
-import { Loader2, Scissors, Stethoscope, Dumbbell, Briefcase, Wrench, GraduationCap, ArrowLeft } from "lucide-react";
+import { Stethoscope, Sparkles, Scissors, Heart, Settings } from "lucide-react";
 
 const BUSINESS_TYPES = [
-  { value: "beauty", label: "Beleza & Estética", description: "Salões de beleza, maquiadores, spas", icon: Scissors },
-  { value: "nail_designer", label: "Nail Designer", description: "Manicures, pedicures, nail art", icon: Scissors },
-  { value: "barbershop", label: "Barbearia", description: "Barbearias e barber shops", icon: Scissors },
-  { value: "clinic", label: "Clínica & Saúde", description: "Clínicas, consultórios, nutricionistas", icon: Stethoscope },
-  { value: "therapy", label: "Terapia & Bem-estar", description: "Psicólogos, fisioterapeutas, terapeutas", icon: Dumbbell },
-  { value: "service", label: "Serviços Profissionais", description: "Advogados, contadores, consultores, aulas", icon: Briefcase },
-  { value: "other", label: "Outros", description: "Pet shops, mecânicos, fotógrafos e mais", icon: Wrench },
+  { value: "clinic", label: "Clínica / Estética", description: "Clínicas de estética, dermatologia, odontologia", icon: Stethoscope },
+  { value: "nail_designer", label: "Nail Designer", description: "Manicures, pedicures, nail art", icon: Sparkles },
+  { value: "beauty", label: "Salão / Barbearia", description: "Salões de beleza, barbearias, cabeleireiros", icon: Scissors },
+  { value: "therapy", label: "Terapias / Saúde", description: "Psicólogos, fisioterapeutas, nutricionistas", icon: Heart },
+  { value: "service", label: "Outros serviços", description: "Consultores, personal trainers, fotógrafos", icon: Settings },
 ] as const;
 
+export type BusinessTypeValue = typeof BUSINESS_TYPES[number]["value"];
+
 interface BusinessTypePageProps {
-  companyId: string;
-  onComplete: () => void;
+  onSelect: (type: BusinessTypeValue) => void;
 }
 
-export default function BusinessTypePage({ companyId, onComplete }: BusinessTypePageProps) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubmit = async () => {
-    if (!selected) return;
-    setSubmitting(true);
-
-    const { error } = await supabase
-      .from("companies")
-      .update({ business_type: selected } as any)
-      .eq("id", companyId);
-
-    setSubmitting(false);
-
-    if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
-      return;
-    }
-
-    onComplete();
-  };
+export default function BusinessTypePage({ onSelect }: BusinessTypePageProps) {
+  const [selected, setSelected] = useState<BusinessTypeValue | null>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,15 +29,15 @@ export default function BusinessTypePage({ companyId, onComplete }: BusinessType
         </div>
       </header>
 
-      <main className="container px-4 py-8 max-w-2xl">
+      <main className="container px-4 py-8 max-w-xl">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">Qual é o tipo do seu negócio?</h1>
+          <h1 className="text-2xl font-bold">Vamos configurar seu negócio</h1>
           <p className="text-muted-foreground mt-2">
-            Isso nos ajuda a personalizar sua experiência.
+            Isso nos ajuda a preparar seu sistema automaticamente
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-3">
           {BUSINESS_TYPES.map((type) => {
             const Icon = type.icon;
             const isSelected = selected === type.value;
@@ -76,13 +51,13 @@ export default function BusinessTypePage({ companyId, onComplete }: BusinessType
                 }`}
                 onClick={() => setSelected(type.value)}
               >
-                <CardContent className="p-4 flex items-start gap-3">
-                  <div className={`p-2 rounded-lg shrink-0 ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className={`p-2.5 rounded-xl shrink-0 ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="font-medium text-sm">{type.label}</p>
-                    <p className="text-xs text-muted-foreground">{type.description}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium">{type.label}</p>
+                    <p className="text-sm text-muted-foreground">{type.description}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -90,14 +65,13 @@ export default function BusinessTypePage({ companyId, onComplete }: BusinessType
           })}
         </div>
 
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8">
           <Button
-            onClick={handleSubmit}
-            disabled={!selected || submitting}
-            className="w-full max-w-sm"
+            onClick={() => selected && onSelect(selected)}
+            disabled={!selected}
+            className="w-full"
             size="lg"
           >
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Continuar
           </Button>
         </div>
