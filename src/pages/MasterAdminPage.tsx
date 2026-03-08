@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import AgendyaLogo from "@/components/AgendyaLogo";
+import { getBusinessTypeLabel } from "@/utils/businessTypeLabels";
 import {
   Building2,
   CalendarDays,
@@ -28,6 +29,7 @@ interface CompanyRow {
   status: string;
   document: string;
   created_at: string;
+  business_type: string | null;
 }
 
 interface SubscriptionRow {
@@ -67,7 +69,7 @@ export default function MasterAdminPage() {
     setLoading(true);
 
     const [companiesRes, subsRes, appointmentsRes, membersRes, clientsRes, servicesRes, professionalsRes] = await Promise.all([
-      supabase.from("companies").select("id, name, slug, status, document, created_at").order("created_at", { ascending: false }),
+      supabase.from("companies").select("id, name, slug, status, document, created_at, business_type").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("*"),
       supabase.from("appointments").select("id, company_id"),
       supabase.from("company_members").select("id, company_id"),
@@ -354,8 +356,9 @@ export default function MasterAdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
-                    <th className="p-3">Empresa</th>
-                    <th className="p-3">Slug</th>
+                     <th className="p-3">Empresa</th>
+                     <th className="p-3">Tipo</th>
+                     <th className="p-3">Slug</th>
                     <th className="p-3">Plano</th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Clientes</th>
@@ -369,8 +372,9 @@ export default function MasterAdminPage() {
                 <tbody>
                   {companies.map((c) => (
                     <tr key={c.id} className="border-b hover:bg-muted/50">
-                      <td className="p-3 font-medium">{c.name}</td>
-                      <td className="p-3 text-muted-foreground">{c.slug}</td>
+                       <td className="p-3 font-medium">{c.name}</td>
+                       <td className="p-3 text-muted-foreground text-xs">{getBusinessTypeLabel((c as any).business_type)}</td>
+                       <td className="p-3 text-muted-foreground">{c.slug}</td>
                       <td className="p-3">
                         <Select
                           value={c.subscription?.plan || "free"}
