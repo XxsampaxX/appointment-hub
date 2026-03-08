@@ -304,7 +304,8 @@ export default function RegisterCompanyPage() {
       return;
     }
 
-    setSuccess(true);
+    setCreatedCompanyId(data?.company?.id || null);
+    setShowBusinessType(true);
   };
 
   return (
