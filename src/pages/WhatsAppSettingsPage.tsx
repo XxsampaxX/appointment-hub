@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -178,7 +178,7 @@ export default function WhatsAppSettingsPage() {
   if (!company) return null;
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Integração WhatsApp</h1>
@@ -355,6 +355,6 @@ export default function WhatsAppSettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

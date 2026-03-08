@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useClients } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Client } from "@/types";
@@ -48,11 +48,11 @@ export default function ClientsPage() {
   };
 
   if (loading) {
-    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+    return <SidebarLayout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></SidebarLayout>;
   }
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -118,6 +118,6 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

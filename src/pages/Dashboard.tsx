@@ -3,7 +3,7 @@ import { useServices, useProfessionals, useClients, useAppointments } from "@/se
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import type { Appointment } from "@/types";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -187,16 +187,16 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <Layout>
+      <SidebarLayout>
         <div className="flex justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Layout>
+      </SidebarLayout>
     );
   }
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-8">
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -432,6 +432,6 @@ export default function Dashboard() {
           </Card>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { useBlockedSlots } from "@/hooks/useBlockedSlots";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,7 +126,7 @@ export default function ScheduleSettingsPage() {
   if (!company) return null;
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Configuração de Horários</h1>
@@ -296,6 +296,6 @@ export default function ScheduleSettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

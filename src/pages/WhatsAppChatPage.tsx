@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -208,7 +208,7 @@ export default function WhatsAppChatPage() {
   if (!company) return null;
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-4">
         <div>
           <h1 className="font-heading text-2xl font-bold">Atendimento WhatsApp</h1>
@@ -443,6 +443,6 @@ export default function WhatsAppChatPage() {
           </Card>
         </div>
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }
