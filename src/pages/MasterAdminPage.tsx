@@ -356,8 +356,9 @@ export default function MasterAdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
-                    <th className="p-3">Empresa</th>
-                    <th className="p-3">Slug</th>
+                     <th className="p-3">Empresa</th>
+                     <th className="p-3">Tipo</th>
+                     <th className="p-3">Slug</th>
                     <th className="p-3">Plano</th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Clientes</th>
