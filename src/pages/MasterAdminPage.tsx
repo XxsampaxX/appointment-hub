@@ -69,7 +69,7 @@ export default function MasterAdminPage() {
     setLoading(true);
 
     const [companiesRes, subsRes, appointmentsRes, membersRes, clientsRes, servicesRes, professionalsRes] = await Promise.all([
-      supabase.from("companies").select("id, name, slug, status, document, created_at").order("created_at", { ascending: false }),
+      supabase.from("companies").select("id, name, slug, status, document, created_at, business_type").order("created_at", { ascending: false }),
       supabase.from("subscriptions").select("*"),
       supabase.from("appointments").select("id, company_id"),
       supabase.from("company_members").select("id, company_id"),
