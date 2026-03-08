@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { Link } from "react-router-dom";
 import { useAppointments, useClients, useServices, useProfessionals } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";

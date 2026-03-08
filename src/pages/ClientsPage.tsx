@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Layout from "@/components/Layout";
+import SidebarLayout from "@/components/SidebarLayout";
 import { useClients } from "@/services/supabaseData";
 import { useCompanyContext } from "@/contexts/CompanyContext";
 import type { Client } from "@/types";

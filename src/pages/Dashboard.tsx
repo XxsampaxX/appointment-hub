@@ -432,6 +432,6 @@ export default function Dashboard() {
           </Card>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }
