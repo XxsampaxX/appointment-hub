@@ -296,6 +296,6 @@ export default function ScheduleSettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

@@ -355,6 +355,6 @@ export default function WhatsAppSettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

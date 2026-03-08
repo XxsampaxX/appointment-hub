@@ -443,6 +443,6 @@ export default function WhatsAppChatPage() {
           </Card>
         </div>
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }

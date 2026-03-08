@@ -137,6 +137,6 @@ export default function ProfessionalsPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </SidebarLayout>
   );
 }
