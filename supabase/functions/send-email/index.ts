@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
   // ─── Main send endpoint: POST /send-email ─────────────────────────────────
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.com.br>";
+    const FROM_ADDRESS = Deno.env.get("EMAIL_FROM_ADDRESS") ?? "Agendya <confirmacao@agendya.app>";
 
     console.log(`[Email] RESEND_API_KEY loaded: ${!!RESEND_API_KEY}`);
     console.log(`[Email] FROM_ADDRESS: ${FROM_ADDRESS}`);
