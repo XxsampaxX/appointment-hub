@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
               Authorization: `Bearer ${RESEND_API_KEY}`,
             },
             body: JSON.stringify({
-              from: "Agendya <confirmacao@agendya.com.br>",
+              from: "Agendya <confirmacao@agendya.app>",
               to: [ownerEmail.trim()],
               subject: `Bem-vindo ao Agendya — ${companyName.trim()}`,
               html: `
