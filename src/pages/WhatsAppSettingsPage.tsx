@@ -178,7 +178,7 @@ export default function WhatsAppSettingsPage() {
   if (!company) return null;
 
   return (
-    <Layout>
+    <SidebarLayout>
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-bold">Integração WhatsApp</h1>
