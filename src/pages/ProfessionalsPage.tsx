@@ -55,7 +55,7 @@ export default function ProfessionalsPage() {
   };
 
   if (loading) {
-    return <Layout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+    return <SidebarLayout><div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></SidebarLayout>;
   }
 
   return (
