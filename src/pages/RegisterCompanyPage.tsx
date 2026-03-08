@@ -25,6 +25,8 @@ export default function RegisterCompanyPage() {
   const { currentUser, isAuthenticated, loading: authLoading, register, login } = useAuthContext();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [createdCompanyId, setCreatedCompanyId] = useState<string | null>(null);
+  const [showBusinessType, setShowBusinessType] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [document, setDocument] = useState("");
 
