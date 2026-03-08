@@ -5,7 +5,7 @@ export type AppointmentStatus = "agendado" | "confirmado" | "concluido" | "cance
 export type PaymentMethod = "pix" | "dinheiro" | "credito" | "debito";
 export type SubscriptionStatus = "free" | "pro" | "premium";
 
-export type BusinessType = "beleza" | "saude" | "fitness" | "educacao" | "servicos" | "outros";
+export type BusinessType = "clinic" | "beauty" | "nail_designer" | "barbershop" | "therapy" | "service" | "other";
 
 export interface Company {
   id: string;

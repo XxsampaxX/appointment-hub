@@ -8,12 +8,13 @@ import AgendyaLogo from "@/components/AgendyaLogo";
 import { Loader2, Scissors, Stethoscope, Dumbbell, Briefcase, Wrench, GraduationCap, ArrowLeft } from "lucide-react";
 
 const BUSINESS_TYPES = [
-  { value: "beleza", label: "Beleza & Estética", description: "Salões, barbearias, nail designers, spas", icon: Scissors },
-  { value: "saude", label: "Saúde & Bem-estar", description: "Clínicas, consultórios, psicólogos, nutricionistas", icon: Stethoscope },
-  { value: "fitness", label: "Fitness & Esportes", description: "Personal trainers, academias, estúdios", icon: Dumbbell },
-  { value: "educacao", label: "Educação & Aulas", description: "Professores particulares, escolas, cursos", icon: GraduationCap },
-  { value: "servicos", label: "Serviços Profissionais", description: "Advogados, contadores, consultores", icon: Briefcase },
-  { value: "outros", label: "Outros", description: "Mecânicos, pet shops, fotógrafos e mais", icon: Wrench },
+  { value: "beauty", label: "Beleza & Estética", description: "Salões de beleza, maquiadores, spas", icon: Scissors },
+  { value: "nail_designer", label: "Nail Designer", description: "Manicures, pedicures, nail art", icon: Scissors },
+  { value: "barbershop", label: "Barbearia", description: "Barbearias e barber shops", icon: Scissors },
+  { value: "clinic", label: "Clínica & Saúde", description: "Clínicas, consultórios, nutricionistas", icon: Stethoscope },
+  { value: "therapy", label: "Terapia & Bem-estar", description: "Psicólogos, fisioterapeutas, terapeutas", icon: Dumbbell },
+  { value: "service", label: "Serviços Profissionais", description: "Advogados, contadores, consultores, aulas", icon: Briefcase },
+  { value: "other", label: "Outros", description: "Pet shops, mecânicos, fotógrafos e mais", icon: Wrench },
 ] as const;
 
 interface BusinessTypePageProps {
